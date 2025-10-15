@@ -1,2 +1,9 @@
-# Fidgets
-Sensory play, anytime. A simple platform of calming, interactive fidgets.
+# Testing
+Small projects that may make it into websites!
+
+Navigate to...
+background ->
+src ->
+components ->
+any .jsx file you want!
+

@@ -1,0 +1,68 @@
+.shapes-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh; /* Full viewport width and height to spread shapes across the screen */
+  overflow: hidden;
+}
+
+/* General button styling */
+.shape-button {
+  position: absolute;
+  border: none;
+  cursor: pointer;
+  background: none;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0s, top 0s, left 0s; /* No smooth transition while moving to the new location */
+}
+
+/* Five-pointed star shape using clip-path */
+.star {
+  background-color: currentColor;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+/* Spin-out and fade-out animation */
+@keyframes spinOutFade {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.spin-out-fade {
+  animation: spinOutFade 1s ease-in-out forwards;
+}
+
+/* Fade-in and spin-in animation */
+@keyframes fadeInSpin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 1;
+  }
+}
+
+.fade-in-spin {
+  animation: fadeInSpin 1s ease-in-out forwards;
+}

@@ -1,0 +1,50 @@
+.popfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.pop {
+  position: absolute;
+  background: rgba(173, 216, 230, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(173, 216, 230, 0.5);
+  transition: transform 0s, top 0s, left 0s; /* Instant position change */
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+@keyframes spinOutFade {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.spin-out-fade {
+  animation: spinOutFade 1s ease-in-out forwards;
+}
+
+@keyframes fadeInSpin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 1;
+  }
+}
+
+.fade-in-spin {
+  animation: fadeInSpin 1s ease-in-out forwards;
+}
