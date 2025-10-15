@@ -1,8 +1,19 @@
+.buttons-root,
+:root {
+  --bg: #0b0b0b;
+  --surface: #141414;
+  --text: #e8e8e8;
+  --muted: #a8a8a8;
+  --ring: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
 .shapes-container {
   position: relative;
   width: 100vw;
-  height: 100vh; /* Full viewport width and height to spread shapes across the screen */
+  height: 100dvh; /* true device viewport height */
   overflow: hidden;
+  background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
 }
 
 /* General button styling */
@@ -10,59 +21,47 @@
   position: absolute;
   border: none;
   cursor: pointer;
-  background: none;
+  background: none; /* remove visible bubble */
   outline: none;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: transform 0s, top 0s, left 0s; /* No smooth transition while moving to the new location */
+  color: var(--text);
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+  touch-action: manipulation;
 }
 
 /* Five-pointed star shape using clip-path */
-.star {
-  background-color: currentColor;
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
-}
+.star-shape { width: 88%; height: 88%; pointer-events: none; display: block; }
 
 /* Spin-out and fade-out animation */
-@keyframes spinOutFade {
-  0% {
-    transform: rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(360deg);
-    opacity: 0;
-  }
-}
+/* Separate rotation (applied to star geometry) and opacity (applied to button) */
+@keyframes starSpinOut { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes starSpinIn  { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes fadeOut     { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.86); } }
+@keyframes fadeIn      { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
 
-.spin-out-fade {
-  animation: spinOutFade 1s ease-in-out forwards;
-}
+@keyframes edgeOut { 0% { opacity: 0.8; } 100% { opacity: 0.55; } }
+@keyframes hotOut  { 0% { opacity: 0.85;} 100% { opacity: 0.45; } }
+@keyframes edgeIn  { 0% { opacity: 0.55;} 100% { opacity: 0.8; } }
+@keyframes hotIn   { 0% { opacity: 0.45;} 100% { opacity: 0.85;} }
 
-/* Fade-in and spin-in animation */
-@keyframes fadeInSpin {
-  0% {
-    transform: rotate(0deg);
-    opacity: 0;
-  }
-  100% {
-    transform: rotate(360deg);
-    opacity: 1;
-  }
-}
+.spin-geo { transform-box: fill-box; transform-origin: 50% 50%; }
+.spin-out-fade { animation: fadeOut 0.6s cubic-bezier(.3,.7,.4,1) forwards; }
+.spin-out-fade .spin-geo { animation: starSpinOut 0.6s cubic-bezier(.3,.7,.4,1) forwards; }
+.fade-in-spin { animation: fadeIn 0.6s cubic-bezier(.2,.9,.3,1) forwards; }
+.fade-in-spin .spin-geo { animation: starSpinIn 0.6s cubic-bezier(.2,.9,.3,1) forwards; }
 
-.fade-in-spin {
-  animation: fadeInSpin 1s ease-in-out forwards;
+/* subtle lighting modulation during spin */
+.spin-out-fade .star-shape + rect[clip-path],
+.spin-out-fade rect[clip-path] + rect[clip-path] { animation: edgeOut 0.6s ease-in forwards, hotOut 0.6s ease-in forwards; }
+.fade-in-spin .star-shape + rect[clip-path],
+.fade-in-spin rect[clip-path] + rect[clip-path] { animation: edgeIn 0.6s ease-out forwards, hotIn 0.6s ease-out forwards; }
+
+/* subtle interaction states */
+.shape-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
+.shape-button:hover { filter: brightness(1.0) drop-shadow(0 12px 24px rgba(0,0,0,0.55)); }
