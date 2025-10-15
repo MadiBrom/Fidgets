@@ -9,58 +9,74 @@ const clamp = (min, v, max) => Math.max(min, Math.min(v, max));
 function Home() {
   const playRef = useRef(null);
 
-  // overlay canvas for confetti bursts
+  // overlay canvas for bursts
   const canvasRef = useRef(null);
   const confettiRef = useRef(null);
 
   // circles live in play-area coords
   const [circles, setCircles] = useState([]);
-  const [spawnId, setSpawnId] = useState(null); // the current center “spawn circle”
+  const circlesRef = useRef(circles);
+  useEffect(() => { circlesRef.current = circles; }, [circles]);
+
+  // current center spawn id
+  const [spawnId, setSpawnId] = useState(null);
+
+  // drag state
   const [dragId, setDragId] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  // title gradient with easing
   const [gradientPosition, setGradientPosition] = useState({ x: 50, y: 50 });
+  const targetPosRef = useRef({ x: 50, y: 50 });
+  const rafRef = useRef(0);
 
+  // viewport helpers
   const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
-  const isMobile = viewport.w < 640;
-  const CIRCLE_SIZE = isMobile ? 72 : 100;
 
-  // keep latest circles for window listeners
-  const circlesRef = useRef(circles);
-  useEffect(() => {
-    circlesRef.current = circles;
-  }, [circles]);
+  // lock the spawn size for this session so it never changes mid-game
+  const spawnSizeRef = useRef(null);
+  if (spawnSizeRef.current == null) {
+    spawnSizeRef.current = window.innerWidth < 640 ? 72 : 100;
+  }
 
+  // track viewport and re-clamp circles inside new bounds without changing size
   useEffect(() => {
-    const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
+    const onResize = () => {
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+      // next frame so DOM has updated layout
+      requestAnimationFrame(() => {
+        const rect = playRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        setCircles(prev =>
+          prev.map(c => {
+            const maxX = rect.width - c.size - 8;
+            const maxY = rect.height - c.size - 8;
+            return {
+              ...c,
+              x: clamp(8, c.x, Math.max(8, maxX)),
+              y: clamp(8, c.y, Math.max(8, maxY)),
+            };
+          })
+        );
+      });
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // confetti instance on fixed overlay canvas
+  // confetti instance
   useEffect(() => {
     if (!canvasRef.current) return;
-
-    const resizeCanvas = () => {
-      const c = canvasRef.current;
-      c.width = window.innerWidth;
-      c.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
     confettiRef.current = confetti.create(canvasRef.current, {
       resize: true,
-      useWorker: true,
+      useWorker: true
     });
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-      confettiRef.current = null;
-    };
+    return () => { confettiRef.current = null; };
   }, []);
 
+  // first center circle
   useEffect(() => {
-    spawnCenterCircleAsSpawner(); // create the first center circle
+    spawnCenterCircleAsSpawner();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -69,19 +85,20 @@ function Home() {
     const w = rect?.width ?? viewport.w;
     const h = rect?.height ?? viewport.h;
 
-    const cx = (w - CIRCLE_SIZE) / 2;
-    const cy = (h - CIRCLE_SIZE) / 2;
+    const size = spawnSizeRef.current; // locked for the whole session
+    const cx = (w - size) / 2;
+    const cy = (h - size) / 2;
 
     const circle = {
       id: `c_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      x: clamp(8, cx, w - CIRCLE_SIZE - 8),
-      y: clamp(8, cy, h - CIRCLE_SIZE - 8),
-      color: pickColor(),      // color set once at creation
-      size: CIRCLE_SIZE,
+      x: clamp(8, cx, w - size - 8),
+      y: clamp(8, cy, h - size - 8),
+      color: pickColor(),
+      size
     };
 
-    setCircles((prev) => [...prev, circle]);
-    setSpawnId(circle.id);     // mark this one as the current spawn circle
+    setCircles(prev => [...prev, circle]);
+    setSpawnId(circle.id);
   };
 
   // start drag
@@ -92,7 +109,7 @@ function Home() {
     const rect = playRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const circle = circlesRef.current.find((c) => c.id === id);
+    const circle = circlesRef.current.find(c => c.id === id);
     if (!circle) return;
 
     const px = e.clientX - rect.left;
@@ -102,67 +119,73 @@ function Home() {
     setDragId(id);
   };
 
-  // global drag listeners so we never miss the drop
+  // global drag listeners
   useEffect(() => {
     if (!dragId) return;
 
-    const handleMove = (e) => {
+    const handleMove = e => {
       const rect = playRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const w = rect.width;
-      const h = rect.height;
+      const c = circlesRef.current.find(cc => cc.id === dragId);
+      if (!c) return;
 
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
 
-      const newX = clamp(8, px - dragOffset.x, w - CIRCLE_SIZE - 8);
-      const newY = clamp(8, py - dragOffset.y, h - CIRCLE_SIZE - 8);
+      // bounds use THIS circle's own size
+      const minX = 8;
+      const minY = 8;
+      const maxX = rect.width - c.size - 8;
+      const maxY = rect.height - c.size - 8;
 
-      setCircles((prev) =>
-        prev.map((c) => (c.id === dragId ? { ...c, x: newX, y: newY } : c))
-      );
+      const newX = clamp(minX, px - dragOffset.x, Math.max(minX, maxX));
+      const newY = clamp(minY, py - dragOffset.y, Math.max(minY, maxY));
+
+      setCircles(prev => prev.map(ci => (ci.id === dragId ? { ...ci, x: newX, y: newY } : ci)));
+    };
+
+    const fireBurstAtCircleCenter = circle => {
+      if (!confettiRef.current || !playRef.current || !circle) return;
+      const rectPlay = playRef.current.getBoundingClientRect();
+      const centerWinX = rectPlay.left + circle.x + circle.size / 2;
+      const centerWinY = rectPlay.top + circle.y + circle.size / 2;
+
+      const origin = {
+        x: centerWinX / window.innerWidth,
+        y: centerWinY / window.innerHeight
+      };
+
+      confettiRef.current({
+        particleCount: 120,
+        spread: 360,
+        startVelocity: 20,
+        gravity: 0.95,
+        ticks: 240,
+        scalar: 1,
+        origin,
+        colors: PALETTE
+      });
+      confettiRef.current({
+        particleCount: 14,
+        spread: 360,
+        startVelocity: 20,
+        gravity: 0.96,
+        ticks: 240,
+        scalar: 1.4,
+        origin,
+        colors: PALETTE
+      });
     };
 
     const handleUp = () => {
-      const rectPlay = playRef.current?.getBoundingClientRect();
-      const circle = circlesRef.current.find((c) => c.id === dragId);
-
-      if (rectPlay && circle && confettiRef.current) {
-        // burst EXACT center of the dropped circle
-        const centerWinX = rectPlay.left + circle.x + circle.size / 2;
-        const centerWinY = rectPlay.top + circle.y + circle.size / 2;
-        const originX = centerWinX / window.innerWidth;
-        const originY = centerWinY / window.innerHeight;
-
-        // slower, punchy burst + a few big chunks
-        confettiRef.current({
-          particleCount: isMobile ? 120 : 220,
-          spread: 360,
-          startVelocity: 20,
-          gravity: 0.95,
-          ticks: 240,
-          scalar: 1,
-          origin: { x: originX, y: originY },
-          colors: PALETTE,
-        });
-        confettiRef.current({
-          particleCount: isMobile ? 12 : 20,
-          spread: 360,
-          startVelocity: 36,
-          gravity: 0.96,
-          ticks: 250,
-          scalar: 1.4,
-          origin: { x: originX, y: originY },
-          colors: PALETTE,
-        });
-
-        // Only create a NEW center spawn when the one you dropped was the spawn
+      const circle = circlesRef.current.find(c => c.id === dragId);
+      if (circle) {
+        fireBurstAtCircleCenter(circle);
         if (dragId === spawnId) {
           spawnCenterCircleAsSpawner();
         }
       }
-
       setDragId(null);
     };
 
@@ -175,20 +198,36 @@ function Home() {
       window.removeEventListener("pointerup", handleUp);
       window.removeEventListener("pointercancel", handleUp);
     };
-  }, [dragId, dragOffset, CIRCLE_SIZE, isMobile, spawnId]);
+  }, [dragId, dragOffset, spawnId]);
 
-  const handleMouseMoveTitle = (e) => {
-    setGradientPosition({
-      x: (e.clientX / viewport.w) * 100,
-      y: (e.clientY / viewport.h) * 100,
-    });
-  };
+  // interactive title follow with easing
+  useEffect(() => {
+    const updateTarget = e => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      targetPosRef.current = { x, y };
+    };
+    window.addEventListener("pointermove", updateTarget, { passive: true });
+
+    const animate = () => {
+      setGradientPosition(prev => {
+        const { x: tx, y: ty } = targetPosRef.current;
+        const lerp = 0.15;
+        return { x: prev.x + (tx - prev.x) * lerp, y: prev.y + (ty - prev.y) * lerp };
+      });
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener("pointermove", updateTarget);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const resetBoard = () => {
-    // wipe everything and create exactly one new center spawn
     setCircles([]);
     setSpawnId(null);
-    // next tick to ensure state cleared before spawn
     requestAnimationFrame(() => {
       spawnCenterCircleAsSpawner();
     });
@@ -205,17 +244,13 @@ function Home() {
           width: "100vw",
           height: "100dvh",
           pointerEvents: "none",
-          zIndex: 5,
+          zIndex: 5
         }}
         aria-hidden="true"
       />
 
       <header className="hero">
-        <h1
-          className="title"
-          onMouseMove={handleMouseMoveTitle}
-          style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}
-        >
+        <h1 className="title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
           Interactive Fidget Playground
         </h1>
         <p className="subtitle">Tap, drag, explore</p>
@@ -229,18 +264,18 @@ function Home() {
       </header>
 
       <main ref={playRef} className="play">
-        {circles.map((circle) => (
+        {circles.map(circle => (
           <div
             key={circle.id}
             className="circle"
-            onPointerDown={(e) => onPointerDown(e, circle.id)}
+            onPointerDown={e => onPointerDown(e, circle.id)}
             style={{
               width: `${circle.size}px`,
               height: `${circle.size}px`,
               left: `${circle.x}px`,
               top: `${circle.y}px`,
-              backgroundColor: circle.color, // stays fixed after spawn
-              touchAction: "none",
+              backgroundColor: circle.color,
+              touchAction: "none"
             }}
           />
         ))}

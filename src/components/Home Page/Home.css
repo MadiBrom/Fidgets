@@ -113,6 +113,8 @@ body {
   border: 1px solid var(--ring);
   box-shadow: 0 12px 40px var(--shadow);
   overflow: hidden; /* keeps drags inside visually */
+  box-sizing: border-box;            /* keeps height stable */
+  padding-bottom: clamp(16px, 5vh, 80px); /* bottom breathing room */
 }
 
 /* circles */
