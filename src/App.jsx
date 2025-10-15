@@ -4,7 +4,7 @@ import Slime from "./components/Slime";
 import Navbar from "./components/Navbar";
 import Buttons from "./components/buttons/Buttons";
 import Birds from "./components/Birds";
-import Home from "./components/Home";
+import Home from "./components/Home Page/Home";
 import Pops from "./components/Pops";
 import Lines from "./components/Lines";
 import Ocean from "./components/Ocean";

@@ -1,0 +1,143 @@
+/* hard viewport lock, zero scroll, no surprises */
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* tokens kept local so this file is self-contained */
+:root {
+  --bg: #0f1220;
+  --surface: #171a2b;
+  --text: #e9ecf1;
+  --muted: #aab0bd;
+  --ring: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.35);
+  --radius: 16px;
+}
+
+/* layout */
+.home {
+  /* true device viewport, fixes mobile browser chrome issues */
+  min-height: 100dvh;
+  max-height: 100dvh;
+  background: radial-gradient(1200px 800px at 50% 0%, #13162a 0%, #0b0e1c 60%, #080a15 100%);
+  color: var(--text);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden; /* belt and suspenders */
+}
+
+/* hero */
+.hero {
+  padding: clamp(12px, 2.5vw, 24px);
+  display: grid;
+  gap: 8px;
+  align-items: start;
+}
+
+.title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.05;
+  font-size: clamp(1.4rem, 4.5vw, 3rem);
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #ff4d4d,
+    #ff9f6e,
+    #ffd166,
+    #6ecbff,
+    #b28dff,
+    #ff7ab6,
+    #ff4d4d
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-size: 200% 200%;
+  background-position: var(--gx, 50%) var(--gy, 50%);
+  transition: transform 120ms ease;
+  will-change: background-position;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+}
+
+.hud {
+  margin-top: 6px;
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  background: color-mix(in oklab, var(--surface), transparent 35%);
+  border: 1px solid var(--ring);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px var(--shadow);
+  font-size: 0.9rem;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #71d15b;
+  color: #0d1a10;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:focus-visible {
+  outline: 2px solid #c7a859;
+  outline-offset: 2px;
+}
+.btn:hover {
+  filter: brightness(1.05);
+}
+
+/* play area fills the remaining space and never scrolls */
+.play {
+  position: relative;
+  height: 100%;
+  margin: 0 clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--ring);
+  box-shadow: 0 12px 40px var(--shadow);
+  overflow: hidden; /* keeps drags inside visually */
+}
+
+/* circles */
+.circle {
+  position: absolute;
+  width: clamp(64px, 12vw, 100px);
+  height: clamp(64px, 12vw, 100px);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 80ms ease;
+}
+.circle:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+/* motion comfort */
+@media (prefers-reduced-motion: reduce) {
+  .title {
+    background-size: 100% 100%;
+    background-position: 50% 50%;
+    transition: none;
+  }
+  .circle {
+    transition: none;
+  }
+}

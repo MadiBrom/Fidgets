@@ -1,186 +1,137 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = () => {
-  const [fidgetsDropdownOpen, setFidgetsDropdownOpen] = useState(false);
-  const [visualsDropdownOpen, setVisualsDropdownOpen] = useState(false);
 
-  const toggleFidgetsDropdown = () => {
-    setFidgetsDropdownOpen(!fidgetsDropdownOpen);
-    setVisualsDropdownOpen(false); // Close the other dropdown
+const Navbar = () => {
+  const [fidgetsOpen, setFidgetsOpen] = useState(false);
+  const [visualsOpen, setVisualsOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const closeAll = () => {
+    setFidgetsOpen(false);
+    setVisualsOpen(false);
   };
 
-  const toggleVisualsDropdown = () => {
-    setVisualsDropdownOpen(!visualsDropdownOpen);
-    setFidgetsDropdownOpen(false); // Close the other dropdown
+  const toggleFidgets = () => {
+    setFidgetsOpen((v) => !v);
+    setVisualsOpen(false);
+  };
+
+  const toggleVisuals = () => {
+    setVisualsOpen((v) => !v);
+    setFidgetsOpen(false);
+  };
+
+  const closeMobile = () => {
+    setMobileOpen(false);
+    closeAll();
   };
 
   return (
-    <nav style={{ backgroundColor: "#333", padding: "1rem" }}>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: "1.5rem",
-        }}
+    <header className="site-header" role="banner">
+      {/* Desktop / tablet nav */}
+      <nav className="navbar" aria-label="Primary">
+        <ul className="nav-list">
+          <li className="nav-item">
+            <Link className="nav-link" to="/" onClick={closeAll}>
+              Home
+            </Link>
+          </li>
+
+          <li className="nav-item dropdown">
+            <button
+              className="nav-button"
+              onClick={toggleFidgets}
+              aria-haspopup="true"
+              aria-expanded={fidgetsOpen}
+              aria-controls="fidgets-menu"
+            >
+              Fidgets ▾
+            </button>
+            {fidgetsOpen && (
+              <ul id="fidgets-menu" className="dropdown-menu">
+                <li><Link className="dropdown-link" to="/buttons" onClick={closeAll}>Buttons</Link></li>
+                <li><Link className="dropdown-link" to="/slime" onClick={closeAll}>Slime</Link></li>
+                <li><Link className="dropdown-link" to="/birds" onClick={closeAll}>Birds</Link></li>
+                <li><Link className="dropdown-link" to="/pops" onClick={closeAll}>Pops</Link></li>
+                <li><Link className="dropdown-link" to="/lines" onClick={closeAll}>Lines</Link></li>
+              </ul>
+            )}
+          </li>
+
+          <li className="nav-item dropdown">
+            <button
+              className="nav-button"
+              onClick={toggleVisuals}
+              aria-haspopup="true"
+              aria-expanded={visualsOpen}
+              aria-controls="visuals-menu"
+            >
+              Visuals ▾
+            </button>
+            {visualsOpen && (
+              <ul id="visuals-menu" className="dropdown-menu">
+                <li><Link className="dropdown-link" to="/ocean" onClick={closeAll}>Ocean</Link></li>
+                <li><Link className="dropdown-link" to="/rainbow" onClick={closeAll}>Rainbow</Link></li>
+                <li><Link className="dropdown-link" to="/drips" onClick={closeAll}>Drips</Link></li>
+                {/* <li><Link className="dropdown-link" to="/spiral" onClick={closeAll}>Spiral</Link></li> */}
+              </ul>
+            )}
+          </li>
+        </ul>
+      </nav>
+
+      {/* Mobile icon that does not affect layout height */}
+      <button
+        className="menu-icon"
+        aria-label="Open menu"
+        aria-expanded={mobileOpen}
+        aria-controls="mobile-menu"
+        onClick={() => setMobileOpen(true)}
       >
-        <li>
-          <Link
-            to="/"
-            style={{
-              color: "#fff",
-              textDecoration: "none",
-              padding: "0.5rem 1rem",
-            }}
-          >
-            Home
-          </Link>
-        </li>
-        <li style={{ position: "relative" }}>
-          <button
-            onClick={toggleFidgetsDropdown}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#fff",
-              cursor: "pointer",
-              padding: "0.5rem 1rem",
-              fontSize: "1rem",
-            }}
-          >
-            Fidgets ▼
-          </button>
-          {fidgetsDropdownOpen && (
-            <ul
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                backgroundColor: "#444",
-                borderRadius: "4px",
-                border: "1px solid #ddd",
-                listStyle: "none",
-                padding: "0.5rem 0",
-                margin: "0.5rem 0",
-                zIndex: 1,
-                minWidth: "150px",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              }}
-            >
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/buttons"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Buttons
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/slime"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Slime
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/birds"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Birds
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/pops"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Pops
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/lines"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Lines
-                </Link>
-              </li>
-            </ul>
-          )}
-        </li>
-        <li style={{ position: "relative" }}>
-          <button
-            onClick={toggleVisualsDropdown}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#fff",
-              cursor: "pointer",
-              padding: "0.5rem 1rem",
-              fontSize: "1rem",
-            }}
-          >
-            Visuals ▼
-          </button>
-          {visualsDropdownOpen && (
-            <ul
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                backgroundColor: "#444",
-                borderRadius: "4px",
-                border: "1px solid #ddd",
-                listStyle: "none",
-                padding: "0.5rem 0",
-                margin: "0.5rem 0",
-                zIndex: 1,
-                minWidth: "150px",
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              }}
-            >
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/ocean"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Ocean
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/rainbow"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Rainbow
-                </Link>
-              </li>
-              <li style={{ padding: "0.5rem 1rem" }}>
-                <Link
-                  to="/drips"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Drips
-                </Link>
-              </li>
-              {/* <li>
-                <Link
-                  to="/spiral"
-                  style={{ color: "#fff", textDecoration: "none" }}
-                >
-                  Spiral
-                </Link>
-              </li> */}
-            </ul>
-          )}
-        </li>
-      </ul>
-    </nav>
+        {/* simple svg burger */}
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </button>
+
+      {/* Mobile overlay menu */}
+      {mobileOpen && (
+        <div id="mobile-menu" className="menu-overlay" role="dialog" aria-modal="true">
+          <div className="menu-panel">
+            <div className="menu-header">
+              <span className="menu-title">Menu</span>
+              <button className="menu-close" aria-label="Close menu" onClick={closeMobile}>✕</button>
+            </div>
+
+            <div className="menu-section">
+              <Link className="menu-link" to="/" onClick={closeMobile}>Home</Link>
+            </div>
+
+            <details className="menu-group">
+              <summary>Fidgets</summary>
+              <nav className="menu-links">
+                <Link className="menu-link" to="/buttons" onClick={closeMobile}>Buttons</Link>
+                <Link className="menu-link" to="/slime" onClick={closeMobile}>Slime</Link>
+                <Link className="menu-link" to="/birds" onClick={closeMobile}>Birds</Link>
+                <Link className="menu-link" to="/pops" onClick={closeMobile}>Pops</Link>
+                <Link className="menu-link" to="/lines" onClick={closeMobile}>Lines</Link>
+              </nav>
+            </details>
+
+            <details className="menu-group">
+              <summary>Visuals</summary>
+              <nav className="menu-links">
+                <Link className="menu-link" to="/ocean" onClick={closeMobile}>Ocean</Link>
+                <Link className="menu-link" to="/rainbow" onClick={closeMobile}>Rainbow</Link>
+                <Link className="menu-link" to="/drips" onClick={closeMobile}>Drips</Link>
+                {/* <Link className="menu-link" to="/spiral" onClick={closeMobile}>Spiral</Link> */}
+              </nav>
+            </details>
+          </div>
+        </div>
+      )}
+    </header>
   );
 };
 

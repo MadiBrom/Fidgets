@@ -1,7 +1,162 @@
-body {
+/* base lock already ok from earlier, keeping focus on nav */
+
+.site-header {
+  position: relative;
+  z-index: 20;
+}
+
+/* desktop/tablet navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* nav list */
+.nav-list {
+  list-style: none;
   margin: 0;
-  min-height: 100vh; /* Ensure it covers the viewport height */
-  overflow-y: auto; /* Enable vertical scrolling */
-  background-color: black; /* Dark background */
-  font-family: "Arial", sans-serif;
+  padding: 0;
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.nav-item { position: relative; }
+
+.nav-link,
+.nav-button {
+  color: #fff;
+  text-decoration: none;
+  font: 600 0.95rem/1 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.nav-link:hover,
+.nav-button:hover { background: rgba(255,255,255,0.08); }
+
+/* dropdown */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 160px;
+  padding: 6px 0;
+  margin: 0;
+  list-style: none;
+  background: #444;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+  z-index: 10;
+}
+
+.dropdown-link {
+  display: block;
+  padding: 0.5rem 0.9rem;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dropdown-link:hover { background: rgba(255,255,255,0.08); }
+
+/* mobile icon: positioned so it does not add layout height */
+.menu-icon {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 30;
+  display: none;            /* default hidden on desktop */
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(20, 24, 43, 0.7);
+  color: #fff;
+}
+
+/* full-screen overlay menu on mobile */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(5, 6, 12, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.menu-panel {
+  width: min(86vw, 360px);
+  height: 100dvh;
+  background: #151827;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  box-shadow: -8px 0 28px rgba(0,0,0,0.35);
+  padding: 14px;
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 12px;
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.menu-title {
+  color: #e9ecf1;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.menu-close {
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.menu-section { padding-top: 8px; }
+
+.menu-group summary {
+  color: #e9ecf1;
+  cursor: pointer;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  list-style: none;
+}
+.menu-group[open] summary { background: rgba(255,255,255,0.08); }
+
+.menu-links {
+  display: grid;
+  padding: 6px 4px 8px 6px;
+  gap: 6px;
+}
+
+.menu-link {
+  display: block;
+  color: #e9ecf1;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+}
+.menu-link:hover { background: rgba(255,255,255,0.08); }
+
+/* hide big navbar on small screens, show icon. prevents added height and scroll */
+@media (max-width: 640px) {
+  .navbar { display: none; }
+  .menu-icon { display: grid; place-items: center; }
 }
