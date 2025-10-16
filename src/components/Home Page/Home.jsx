@@ -18,52 +18,48 @@ const nextPaletteColor = (current) => {
 function Home() {
   const playRef = useRef(null);
 
-  // overlay canvas for bursts
+
   const canvasRef = useRef(null);
   const confettiRef = useRef(null);
   const fishTimersRef = useRef([]);
   const [spawnerColor, setSpawnerColor] = useState(pickColor());
   const spawnerTrackRef = useRef({ active: false, startX: 0, startY: 0, createdId: null });
-  // custom fish canvas + system
   const fishCanvasRef = useRef(null);
   const fishCtxRef = useRef(null);
-  const fishListRef = useRef([]); // array of fish particles
+  const fishListRef = useRef([]); 
   const fishRafRef = useRef(0);
 
-  // circles live in play-area coords
   const [circles, setCircles] = useState([]);
   const circlesRef = useRef(circles);
   useEffect(() => { circlesRef.current = circles; }, [circles]);
 
-  // unified responsive circle size (spawner + placed)
   const responsiveSize = () => (window.innerWidth < 640 ? 72 : 100);
   const [circleSize, setCircleSize] = useState(responsiveSize());
 
-  // drag state
+  // progress goal + local stacking completions
+  const GOAL = 20;
+  const [totalCompletions, setTotalCompletions] = useState(0);
+  const goalCountedRef = useRef(false);
+  const [showReward, setShowReward] = useState(false);
+  const rewardTimerRef = useRef(null);
+
   const [dragId, setDragId] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const dragStartRef = useRef({ x: 0, y: 0 });
 
-  // title gradient with easing
   const [gradientPosition, setGradientPosition] = useState({ x: 50, y: 50 });
   const targetPosRef = useRef({ x: 50, y: 50 });
   const rafRef = useRef(0);
-  // tilt hover (mobile) and wind influence
-  const tiltRef = useRef({ x: 0, y: 0 }); // normalized [-1,1]
+  const tiltRef = useRef({ x: 0, y: 0 }); 
 
-  // viewport helpers
+
   const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
 
-  // unified size now updates with viewport
-
-  // track viewport and re-clamp circles; update sizes to new responsive size
   useEffect(() => {
     const onResize = () => {
       setViewport({ w: window.innerWidth, h: window.innerHeight });
-      // update responsive size and propagate to placed circles
       const newSize = responsiveSize();
       setCircleSize(prev => (prev !== newSize ? newSize : prev));
-      // next frame so DOM has updated layout
       requestAnimationFrame(() => {
         const rect = playRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -85,7 +81,6 @@ function Home() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // confetti instance
   useEffect(() => {
     if (!canvasRef.current) return;
     confettiRef.current = confetti.create(canvasRef.current, {
@@ -95,7 +90,46 @@ function Home() {
     return () => { confettiRef.current = null; };
   }, []);
 
-  // fish canvas setup + loop
+  // load stored completions once
+  useEffect(() => {
+    try {
+      const v = parseInt(localStorage.getItem("home_goal_completions") || "0", 10);
+      setTotalCompletions(Number.isFinite(v) ? v : 0);
+    } catch { /* ignore */ }
+  }, []);
+
+  // count completion once per fill and celebrate
+  useEffect(() => {
+    if (circles.length >= GOAL && !goalCountedRef.current) {
+      goalCountedRef.current = true;
+      let next = 0;
+      try {
+        const prev = parseInt(localStorage.getItem("home_goal_completions") || "0", 10) || 0;
+        next = prev + 1;
+        localStorage.setItem("home_goal_completions", String(next));
+      } catch { next = totalCompletions + 1; }
+      setTotalCompletions(next);
+      setShowReward(true);
+      if (rewardTimerRef.current) clearTimeout(rewardTimerRef.current);
+      rewardTimerRef.current = setTimeout(() => setShowReward(false), 10000);
+
+      if (confettiRef.current) {
+        confettiRef.current({
+          particleCount: 150,
+          spread: 80,
+          startVelocity: 28,
+          gravity: 0.9,
+          ticks: 220,
+          origin: { x: 0.5, y: 0.25 },
+          colors: ["#00E5FF", "#6C3BFF", "#FF00FF", "#FFFFFF"],
+        });
+      }
+    }
+    if (circles.length < GOAL) goalCountedRef.current = false;
+  }, [circles.length]);
+
+  useEffect(() => () => { if (rewardTimerRef.current) clearTimeout(rewardTimerRef.current); }, []);
+
   useEffect(() => {
     const cvs = fishCanvasRef.current;
     if (!cvs) return;
@@ -117,21 +151,20 @@ function Home() {
 
     let last = performance.now();
     const loop = (now) => {
-      const dt = Math.min(0.05, (now - last) / 1000); // seconds, clamp to 50ms
+      const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
 
-      // clear fully so the screen never darkens
       ctx.globalCompositeOperation = "source-over";
       ctx.clearRect(0, 0, cvs.width, cvs.height);
 
-      // draw fish (standard alpha, no additive blend)
+
       ctx.globalCompositeOperation = "source-over";
       const fish = fishListRef.current;
       for (let i = fish.length - 1; i >= 0; i--) {
         const f = fish[i];
         f.t += dt;
 
-        // two-stage motion: explode then swim
+ 
         if (!f.swim && f.t >= f.explodeTime) {
           f.swim = true;
           f.speed = f.swimSpeed;
@@ -623,17 +656,41 @@ function Home() {
         <h1 className="title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
           Interactive Fidget Playground
         </h1>
-        <p className="subtitle">Tap, drag, explore</p>
 
-        <div className="hud">
-          <span>{circles.length} circles</span>
-          <button className="btn" onClick={resetBoard} aria-label="Reset board">
-            Reset
-          </button>
-        </div>
+
+        {(() => {
+          const progress = Math.min(circles.length, GOAL);
+          const done = progress >= GOAL;
+          const pct = Math.round((progress / GOAL) * 100);
+          return (
+            <div className="hud" role="status" aria-live="polite">
+              <div className="hud-left" title="Total completions">
+                <span className="hud-star" aria-hidden="true">★</span>
+                <span className="hud-count" aria-label={`Total completions ${totalCompletions}`}>{totalCompletions}</span>
+              </div>
+              <div className="progress" aria-label="circle progress">
+                <div className="progress-fill" style={{ width: `${pct}%` }} />
+              </div>
+              <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
+              <span className="sr-only">{pct}%</span>
+            </div>
+          );
+        })()}
       </header>
 
       <main ref={playRef} className="play">
+        {showReward && (
+          <div className="reward-overlay" role="dialog" aria-modal="true" onClick={() => setShowReward(false)}>
+            <div className="reward-modal" onClick={e => e.stopPropagation()}>
+              <h2 className="reward-title">Achievement unlocked</h2>
+              <p className="reward-text">Total completions: {totalCompletions}</p>
+              <div className="reward-actions">
+                <button className="btn" onClick={() => setShowReward(false)} aria-label="Dismiss reward">Dismiss</button>
+                <button className="btn" onClick={() => { setShowReward(false); resetBoard(); }} aria-label="Reset board">Reset</button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Persistent center spawner (non-draggable), always centered */}
         <div
           className="circle"

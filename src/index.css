@@ -79,7 +79,7 @@
 .menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 1000; /* ensure above in-page HUDs and canvases */
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: flex-start;
@@ -99,6 +99,7 @@
   transform: translateX(16px);
   opacity: 0;
   animation: slideInRight 220ms ease-out forwards;
+  z-index: 1001;
 }
 
 @keyframes slideInRight {

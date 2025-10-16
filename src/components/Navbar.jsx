@@ -27,6 +27,13 @@ const Navbar = () => {
     closeAll();
   };
 
+  // Add/remove a body class so pages can respond (e.g., hide HUDs under the drawer)
+  React.useEffect(() => {
+    if (mobileOpen) document.body.classList.add("menu-open");
+    else document.body.classList.remove("menu-open");
+    return () => document.body.classList.remove("menu-open");
+  }, [mobileOpen]);
+
   return (
     <header className="site-header" role="banner">
       {/* Desktop / tablet nav */}

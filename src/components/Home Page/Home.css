@@ -31,14 +31,13 @@ body {
   color: var(--text);
   display: grid;
   grid-template-rows: auto 1fr;
-  overflow: hidden; /* belt and suspenders */
+  overflow: hidden;
 }
 
-/* hero */
 .hero {
   padding: clamp(12px, 2.5vw, 24px);
   display: grid;
-  gap: 8px;
+  gap: 8px; 
   align-items: start;
 }
 
@@ -69,17 +68,86 @@ body {
 }
 
 .hud {
-  margin-top: 6px;
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  width: min(92vw, 620px);
+}
+
+.progress {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00E5FF, #6C3BFF, #FF00FF);
+  width: 0%;
+  transition: width 220ms ease;
+}
+
+.hud-complete {
   display: inline-flex;
   gap: 10px;
   align-items: center;
-  padding: 6px 10px;
-  background: color-mix(in oklab, var(--surface), transparent 35%);
-  border: 1px solid var(--ring);
-  border-radius: 999px;
-  box-shadow: 0 4px 16px var(--shadow);
-  font-size: 0.9rem;
+  justify-content: center;
 }
+.reset-btn { margin-left: 6px; }
+
+/* left tally inside HUD */
+.hud-left { display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); }
+.hud-star{ color:#FFD400; text-shadow: 0 0 6px rgba(255,212,0,0.5); }
+.hud-count{ font: 800 0.85rem/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; }
+.icon-btn{ width:28px; height:28px; display:grid; place-items:center; border-radius:8px; padding:0; }
+
+/* Retro tally pill */
+
+/* Retro-ish reset icon button */
+.reset-btn{ width:28px; height:28px; padding:0; display:grid; place-items:center; border-radius:8px; }
+.reset-btn span{ font-size:16px; }
+.hud-msg { font-weight: 700; color: var(--text); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reward modal */
+.reward-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+}
+.reward-modal {
+  width: min(92vw, 420px);
+  background: color-mix(in oklab, var(--surface), transparent 20%);
+  border: 1px solid var(--ring);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  padding: 16px 16px 12px;
+  color: var(--text);
+  animation: rewardIn 200ms ease-out;
+}
+.reward-title { margin: 0 0 6px; font: 800 1.1rem/1.2 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; }
+.reward-text { margin: 0 0 12px; opacity: 0.9; }
+.reward-actions { display: inline-flex; gap: 8px; }
+
+@keyframes rewardIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .btn {
   appearance: none;
