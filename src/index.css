@@ -6,14 +6,7 @@
 }
 
 /* desktop/tablet navbar */
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface, #1a1a1a);
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--ring, rgba(255,255,255,0.08));
-}
+.navbar { display: none; }
 
 /* nav list */
 .nav-list {
@@ -73,7 +66,7 @@
   top: 12px;
   right: 12px;
   z-index: 30;
-  display: none;            /* default hidden on desktop */
+  display: grid;            /* show on all breakpoints */
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -103,6 +96,14 @@
   display: grid;
   grid-auto-rows: max-content;
   gap: 12px;
+  transform: translateX(16px);
+  opacity: 0;
+  animation: slideInRight 220ms ease-out forwards;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .menu-header {
@@ -156,7 +157,4 @@
 .menu-link:hover { background: rgba(255,255,255,0.08); }
 
 /* hide big navbar on small screens, show icon. prevents added height and scroll */
-@media (max-width: 640px) {
-  .navbar { display: none; }
-  .menu-icon { display: grid; place-items: center; }
-}
+/* icon shown on all sizes now */

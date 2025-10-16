@@ -50,16 +50,26 @@ const COLORS = [
 ];
 
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+const SAFE_TOP = () => (window.innerWidth <= 640 ? 96 : 56);
+const EDGE_PAD = 8;
 const getRandomPosition = () => ({
-  top: Math.max(0, Math.random() * (window.innerHeight - 100)),
-  left: Math.max(0, Math.random() * (window.innerWidth - 100)),
+  top: Math.max(SAFE_TOP(), Math.random() * (window.innerHeight - 100 - SAFE_TOP())),
+  left: Math.max(EDGE_PAD, Math.random() * (window.innerWidth - 100 - EDGE_PAD)),
 });
+const getRandomPositionForSize = (size) => {
+  const safeTop = SAFE_TOP();
+  const maxTop = Math.max(safeTop, window.innerHeight - size - EDGE_PAD);
+  const maxLeft = Math.max(EDGE_PAD, window.innerWidth - size - EDGE_PAD);
+  const top = safeTop + Math.random() * Math.max(0, maxTop - safeTop);
+  const left = EDGE_PAD + Math.random() * Math.max(0, maxLeft - EDGE_PAD);
+  return { top, left };
+};
 
 const Buttons = () => {
   const [stars, setStars] = useState([]);
   const timersRef = useRef(new Map()); 
   const [focusMode, setFocusMode] = useState(true);
-  const [target, setTarget] = useState(20); 
+  const [target, setTarget] = useState(30); 
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(false);
   const completeTimerRef = useRef(null);
@@ -70,15 +80,35 @@ const Buttons = () => {
   const breatherTimerRef = useRef(null);
   const countedRef = useRef(new Set());
 
+  const [breathPhase, setBreathPhase] = useState("in"); 
+  const [breathCount, setBreathCount] = useState(1);    
+  const phaseTickRef = useRef(0);
+  const [breatherStage, setBreatherStage] = useState("idle"); 
+  const introTimeoutRef = useRef(null);
+  const introWords = ["Take", "a", "breath"];
+  const [introIndex, setIntroIndex] = useState(0);
+  const introWordTimerRef = useRef(null);
+  const [showGame, setShowGame] = useState(true);
+
   useEffect(() => {
-    const generated = Array.from({ length: 20 }, (_, i) => ({
-      id: `star${i + 1}`,
-      size: Math.floor(Math.random() * 70) + 70,
-      color: getRandomColor(),
-      position: getRandomPosition(),
-      phase: "idle",
-      key: 0,
-    }));
+    const vw = window.innerWidth;
+    let count = 24;
+    if (vw < 420) count = 20;
+    else if (vw < 768) count = 26;
+    else if (vw < 1200) count = 32;
+    else count = 40;
+
+    const generated = Array.from({ length: count }, (_, i) => {
+      const size = Math.floor(Math.random() * 70) + 70;
+      return {
+        id: `star${i + 1}`,
+        size,
+        color: getRandomColor(),
+        position: getRandomPositionForSize(size),
+        phase: "idle",
+        key: 0,
+      };
+    });
     setStars(generated);
   }, []);
 
@@ -112,19 +142,48 @@ const Buttons = () => {
           toastTimerRef.current = setTimeout(() => setShowToast(false), 2800);
 
           setPaused(true);
-          setCountdown(5);
-          if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
-          breatherTimerRef.current = setInterval(() => {
-            setCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(breatherTimerRef.current);
-                breatherTimerRef.current = null;
-                setPaused(false);
-                return 0;
+          setShowGame(false);
+          setBreatherStage("intro");
+          setIntroIndex(0);
+          if (introWordTimerRef.current) clearInterval(introWordTimerRef.current);
+          introWordTimerRef.current = setInterval(() => {
+            setIntroIndex(prev => {
+              if (prev >= introWords.length - 1) {
+                clearInterval(introWordTimerRef.current);
+                introWordTimerRef.current = null;
+                if (introTimeoutRef.current) clearTimeout(introTimeoutRef.current);
+                introTimeoutRef.current = setTimeout(() => {
+                  setBreatherStage("breathing");
+                  setCountdown(24);
+                  setBreathPhase("in");
+                  phaseTickRef.current = 0;
+                  if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
+                  breatherTimerRef.current = setInterval(() => {
+                    setCountdown(prevC => {
+                      const nextC = prevC - 1;
+                      phaseTickRef.current += 1;
+                      if (phaseTickRef.current >= 4) {
+                        phaseTickRef.current = 0;
+                        setBreathPhase(p => (p === "in" ? "out" : "in"));
+                      }
+                      if (nextC <= 0) {
+                        clearInterval(breatherTimerRef.current);
+                        breatherTimerRef.current = null;
+                        setPaused(false);
+                        setBreatherStage("idle");
+                        setShowGame(true);
+                        countedRef.current.clear();
+                        return 0;
+                      }
+                      return nextC;
+                    });
+                  }, 1000);
+                }, 500);
+                return prev; 
               }
-              return prev - 1;
+              return prev + 1;
             });
-          }, 1000);
+          }, 500);
           return 0;
         }
         return next;
@@ -134,7 +193,7 @@ const Buttons = () => {
     const toIn = setTimeout(() => {
       setStars(prev => prev.map(s => s.id === id ? {
         ...s,
-        position: getRandomPosition(),
+        position: getRandomPositionForSize(s.size),
         phase: "in",
         key: s.key + 1,
       } : s));
@@ -157,8 +216,9 @@ const Buttons = () => {
     });
     timersRef.current.clear();
     if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
+    if (introTimeoutRef.current) clearTimeout(introTimeoutRef.current);
+    if (introWordTimerRef.current) clearInterval(introWordTimerRef.current);
   }, []);
 
   const d = roundedStarPath({ points: 5, outer: 56, inner: 36, round: 14 });
@@ -166,26 +226,30 @@ const Buttons = () => {
   return (
     <div className="shapes-container">
 
+      {!paused && (
       <div className="focus-hud" onClick={() => setFocusMode(f => !f)} role="button" aria-label="Toggle focus mode">
-        {Array.from({ length: target }).map((_, i) => (
-          <span key={i} className={`dot ${i < progress ? "active" : ""}`} />
-        ))}
+        <div className="hud-bar">
+          <div className="hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
+        </div>
         <span className="hud-label">{focusMode ? `${progress}/${target}` : "focus off"}</span>
       </div>
+      )}
       {completed && <div className="completion-glow" aria-hidden="true" />}
       {paused && (
         <div className="breather-overlay" role="status" aria-live="polite">
           <div className="breather-pulse" aria-hidden="true" />
-          <div className="countdown">{countdown}</div>
-          <div className="breather-sub">breather</div>
+          <div className={`breather-fill ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
+          <div className={`breather-ring ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
+          <div className="breather-sub">
+            {breatherStage === 'intro' ? introWords[introIndex] : `${breathPhase}`}
+          </div>
         </div>
       )}
-      {stars.map(star => (
+      {showGame && stars.map(star => (
         <button
           key={`${star.id}-${star.key}`}
           className={`shape-button ${star.phase === "out" ? "spin-out-fade" : ""} ${star.phase === "in" ? "fade-in-spin" : ""}`}
           onPointerDown={(e) => {
-            // Immediately make this star click-through and visually drop it beneath idles
             e.currentTarget.style.pointerEvents = 'none';
             e.currentTarget.style.zIndex = '0';
             handleClick(star.id);
