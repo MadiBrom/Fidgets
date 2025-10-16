@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./buttons.css";
 
-// Generate a rounded 5-point star path (normalized to 100x100 viewBox)
 const roundedStarPath = ({ points = 5, outer = 48, inner = 26, round = 7 }) => {
   const cx = 50, cy = 50;
   const step = Math.PI / points;
@@ -43,8 +42,11 @@ const roundedStarPath = ({ points = 5, outer = 48, inner = 26, round = 7 }) => {
 };
 
 const COLORS = [
-  "#39ff14", "#ff073a", "#00ffff", "#ff00ff", "#ff5f1f",
-  "#0afff1", "#f4f930", "#fe019a", "#adff2f",
+  "#00FFFF", "#00E5FF", "#00D1FF", "#00FFC8", "#00FFEA",
+  "#00B3FF", "#1A7CFF", "#3D5AFE", "#2E7DFF",
+  "#6C3BFF", "#7A00FF", "#9D00FF", "#B300FF", "#B28DFF",
+  "#FF00FF", "#FF00C8", "#FF2E88", "#FF77FF",
+  "#ADFF2F", "#FF6B00"
 ];
 
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -55,60 +57,160 @@ const getRandomPosition = () => ({
 
 const Buttons = () => {
   const [stars, setStars] = useState([]);
+  const timersRef = useRef(new Map()); 
+  const [focusMode, setFocusMode] = useState(true);
+  const [target, setTarget] = useState(20); 
+  const [progress, setProgress] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const completeTimerRef = useRef(null);
+  const [showToast, setShowToast] = useState(false);
+  const toastTimerRef = useRef(null);
+  const [paused, setPaused] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const breatherTimerRef = useRef(null);
+  const countedRef = useRef(new Set());
 
   useEffect(() => {
     const generated = Array.from({ length: 20 }, (_, i) => ({
       id: `star${i + 1}`,
-      size: Math.floor(Math.random() * 50) + 50,
+      size: Math.floor(Math.random() * 70) + 70,
       color: getRandomColor(),
       position: getRandomPosition(),
-      phase: "idle", // idle, out, in
-      key: 0,        // bump to retrigger CSS animations
+      phase: "idle",
+      key: 0,
     }));
     setStars(generated);
   }, []);
 
   const handleClick = (id) => {
-    // phase 1 spin out and fade
+    if (paused) return; 
+    if (countedRef.current.has(id)) return;
+    const OUT_MS = 1000;
+    const IN_MS = 1000;
+
+  
+    const t = timersRef.current.get(id);
+    if (t) {
+      if (t.toIn) clearTimeout(t.toIn);
+      if (t.toIdle) clearTimeout(t.toIdle);
+      timersRef.current.delete(id);
+    }
+
+    countedRef.current.add(id);
+
     setStars(prev => prev.map(s => s.id === id ? { ...s, phase: "out", key: s.key + 1 } : s));
 
-    // after out animation, teleport and spin in
-    setTimeout(() => {
-      setStars(prev => prev.map(s => {
-        if (s.id !== id) return s;
-        return {
-          ...s,
-          position: getRandomPosition(),
-          phase: "in",
-          key: s.key + 1,
-        };
-      }));
-      // clear back to idle after spin in
-      setTimeout(() => {
+    if (focusMode) {
+      setProgress(prev => {
+        const next = prev + 1;
+        if (next >= target) {
+          setCompleted(true);
+          if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
+          completeTimerRef.current = setTimeout(() => setCompleted(false), 1200);
+          setShowToast(true);
+          if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+          toastTimerRef.current = setTimeout(() => setShowToast(false), 2800);
+
+          setPaused(true);
+          setCountdown(3);
+          if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
+          breatherTimerRef.current = setInterval(() => {
+            setCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(breatherTimerRef.current);
+                breatherTimerRef.current = null;
+                setPaused(false);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          return 0;
+        }
+        return next;
+      });
+    }
+
+    const toIn = setTimeout(() => {
+      setStars(prev => prev.map(s => s.id === id ? {
+        ...s,
+        position: getRandomPosition(),
+        phase: "in",
+        key: s.key + 1,
+      } : s));
+
+      const toIdle = setTimeout(() => {
         setStars(prev => prev.map(s => s.id === id ? { ...s, phase: "idle" } : s));
-      }, 600); // matches fade-in time
-    }, 600);   // matches spin-out time
+        countedRef.current.delete(id);
+        timersRef.current.delete(id);
+      }, IN_MS);
+      timersRef.current.set(id, { toIn: null, toIdle });
+    }, OUT_MS);
+
+    timersRef.current.set(id, { toIn, toIdle: null });
   };
 
-  const d = roundedStarPath({ points: 5, outer: 48, inner: 30, round: 9 });
+  useEffect(() => () => {
+    timersRef.current.forEach(({ toIn, toIdle }) => {
+      if (toIn) clearTimeout(toIn);
+      if (toIdle) clearTimeout(toIdle);
+    });
+    timersRef.current.clear();
+    if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
+  }, []);
+
+  const d = roundedStarPath({ points: 5, outer: 56, inner: 36, round: 14 });
 
   return (
     <div className="shapes-container">
+
+      <div className="focus-hud" onClick={() => setFocusMode(f => !f)} role="button" aria-label="Toggle focus mode">
+        {Array.from({ length: target }).map((_, i) => (
+          <span key={i} className={`dot ${i < progress ? "active" : ""}`} />
+        ))}
+        <span className="hud-label">{focusMode ? `${progress}/${target}` : "focus off"}</span>
+      </div>
+      {completed && <div className="completion-glow" aria-hidden="true" />}
+      {showToast && (
+        <div className="completion-toast" role="status" aria-live="polite">
+          <button
+            className="toast-btn"
+            onClick={() => {
+              setShowToast(false);
+              setProgress(0);
+            }}
+          >Again</button>
+        </div>
+      )}
+      {paused && (
+        <div className="breather-overlay" role="status" aria-live="polite">
+          <div className="countdown">{countdown}</div>
+          <div className="breather-sub">breather</div>
+        </div>
+      )}
       {stars.map(star => (
-// inside the map render
-<button
-  key={`${star.id}-${star.key}`}
-  className={`shape-button ${star.phase === "out" ? "spin-out-fade" : ""} ${star.phase === "in" ? "fade-in-spin" : ""}`}
-  onClick={() => handleClick(star.id)}
-  style={{
-    top: `${star.position.top}px`,
-    left: `${star.position.left}px`,
-    width: `${star.size}px`,
-    height: `${star.size}px`,
-    color: star.color,
-  }}
-  aria-label={star.id}
->
+        <button
+          key={`${star.id}-${star.key}`}
+          className={`shape-button ${star.phase === "out" ? "spin-out-fade" : ""} ${star.phase === "in" ? "fade-in-spin" : ""}`}
+          onClick={() => handleClick(star.id)}
+          style={{
+            top: `${star.position.top}px`,
+            left: `${star.position.left}px`,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
+            color: star.color,
+          }}
+          aria-label={star.id}
+        >
+          <span
+            className="lift-shadow"
+            aria-hidden="true"
+            style={{
+              background: `radial-gradient(50% 60% at 50% 50%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0) 70%)`
+            }}
+          />
   <svg
     className="star-shape"
     viewBox="0 0 100 100"
@@ -126,16 +228,41 @@ const Buttons = () => {
         <stop offset="55%" stopColor="rgba(0,0,0,0)" />
         <stop offset="100%" stopColor="rgba(0,0,0,0)" />
       </linearGradient>
+      <linearGradient id={`${star.id}-liftTop`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+        <stop offset="35%" stopColor="rgba(255,255,255,0.18)" />
+        <stop offset="70%" stopColor="rgba(255,255,255,0.02)" />
+        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+      </linearGradient>
+      <linearGradient id={`${star.id}-rim`} gradientUnits="userSpaceOnUse" x1="100" y1="100" x2="0" y2="0">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+        <stop offset="35%" stopColor="rgba(255,255,255,0.06)" />
+        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+      </linearGradient>
       <radialGradient id={`${star.id}-hot`} gradientUnits="userSpaceOnUse" cx="34" cy="28" r="20">
         <stop offset="0%" stopColor="rgba(255,255,255,0.5)" />
         <stop offset="60%" stopColor="rgba(255,255,255,0.12)" />
         <stop offset="100%" stopColor="rgba(255,255,255,0)" />
       </radialGradient>
+      <radialGradient id={`${star.id}-shade`} gradientUnits="userSpaceOnUse" cx="50" cy="50" r="48">
+        <stop offset="0%" stopColor="rgba(0,0,0,0.22)" />
+        <stop offset="70%" stopColor="rgba(0,0,0,0.10)" />
+        <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+      </radialGradient>
     </defs>
-
-    <path className="spin-geo" d={d} fill="currentColor" shapeRendering="geometricPrecision" />
-    <rect width="100" height="100" fill={`url(#${star.id}-edge)`} clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.8 }} />
-    <rect width="100" height="100" fill={`url(#${star.id}-hot)`}  clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.85 }} />
+    <path className="spin-geo" d={d} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="3" strokeLinejoin="round" pointerEvents="none"/>
+    <path
+      className="spin-geo"
+      d={d}
+      fill="currentColor"
+      fillOpacity="0.78"
+      shapeRendering="geometricPrecision"
+    />
+    <rect width="100" height="100" fill={`url(#${star.id}-edge)`} clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.8 }} pointerEvents="none" />
+    <rect width="100" height="100" fill={`url(#${star.id}-hot)`}  clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.85 }} pointerEvents="none" />
+    <rect width="100" height="100" fill={`url(#${star.id}-liftTop)`} clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.65 }} />
+    <rect width="100" height="100" fill={`url(#${star.id}-rim)`}   clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.5 }} pointerEvents="none" />
+    <rect width="100" height="100" fill={`url(#${star.id}-shade)`} clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "multiply", opacity: 0.6 }} pointerEvents="none" />
   </svg>
 </button>
       ))}

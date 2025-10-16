@@ -15,6 +15,14 @@
   overflow: hidden;
   background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
 }
+/* Focus HUD */
+.focus-hud { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+  background: color-mix(in oklab, var(--surface), transparent 35%);
+  font: 600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; color: var(--text); user-select: none; cursor: pointer; z-index: 2; }
+.focus-hud .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.focus-hud .dot.active { background: radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.15) 100%); }
+.focus-hud .hud-label { opacity: 0.8; letter-spacing: 0.3px; }
 
 /* General button styling */
 .shape-button {
@@ -28,19 +36,38 @@
   align-items: center;
   transition: transform 0s, top 0s, left 0s; /* No smooth transition while moving to the new location */
   color: var(--text);
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+  filter: drop-shadow(0 14px 22px rgba(0,0,0,0.6));
   touch-action: manipulation;
+  position: absolute;
 }
 
-/* Five-pointed star shape using clip-path */
-.star-shape { width: 88%; height: 88%; pointer-events: none; display: block; }
+/* Restore button wrapper styling to avoid white focus/active rectangles */
+.shape-button {
+  position: absolute;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  outline: none;
+  display: block;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* iOS/Android remove white tap square */
+  box-shadow: none;
+}
+.shape-button:focus,
+.shape-button:focus-visible,
+.shape-button:active { outline: none; box-shadow: none; }
+.shape-button::-moz-focus-inner { border: 0; }
+
+/* SVG wrapper sizing; allow pointer events so inner path can handle clicks */
+.star-shape { width: 88%; height: 88%; display: block; pointer-events: visiblePainted; -webkit-tap-highlight-color: transparent; }
 
 /* Spin-out and fade-out animation */
 /* Separate rotation (applied to star geometry) and opacity (applied to button) */
 @keyframes starSpinOut { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes starSpinIn  { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-@keyframes fadeOut     { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.86); } }
-@keyframes fadeIn      { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes fadeOut     { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fadeIn      { 0% { opacity: 0; } 100% { opacity: 1; } }
 
 @keyframes edgeOut { 0% { opacity: 0.8; } 100% { opacity: 0.55; } }
 @keyframes hotOut  { 0% { opacity: 0.85;} 100% { opacity: 0.45; } }
@@ -48,20 +75,103 @@
 @keyframes hotIn   { 0% { opacity: 0.45;} 100% { opacity: 0.85;} }
 
 .spin-geo { transform-box: fill-box; transform-origin: 50% 50%; }
-.spin-out-fade { animation: fadeOut 0.6s cubic-bezier(.3,.7,.4,1) forwards; }
-.spin-out-fade .spin-geo { animation: starSpinOut 0.6s cubic-bezier(.3,.7,.4,1) forwards; }
-.fade-in-spin { animation: fadeIn 0.6s cubic-bezier(.2,.9,.3,1) forwards; }
-.fade-in-spin .spin-geo { animation: starSpinIn 0.6s cubic-bezier(.2,.9,.3,1) forwards; }
+.spin-out-fade { animation: fadeOut 1s cubic-bezier(.3,.7,.4,1) forwards; }
+.spin-out-fade .spin-geo { animation: starSpinOut 1s cubic-bezier(.3,.7,.4,1) forwards; }
+.fade-in-spin { animation: fadeIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
+.fade-in-spin .spin-geo { animation: starSpinIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
 
 /* subtle lighting modulation during spin */
 .spin-out-fade .star-shape + rect[clip-path],
-.spin-out-fade rect[clip-path] + rect[clip-path] { animation: edgeOut 0.6s ease-in forwards, hotOut 0.6s ease-in forwards; }
+.spin-out-fade rect[clip-path] + rect[clip-path] { animation: edgeOut 1s ease-in forwards, hotOut 1s ease-in forwards; }
 .fade-in-spin .star-shape + rect[clip-path],
-.fade-in-spin rect[clip-path] + rect[clip-path] { animation: edgeIn 0.6s ease-out forwards, hotIn 0.6s ease-out forwards; }
+.fade-in-spin rect[clip-path] + rect[clip-path] { animation: edgeIn 1s ease-out forwards, hotIn 1s ease-out forwards; }
 
-/* subtle interaction states */
-.shape-button:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+/* remove jelly scale to keep shape constant */
+.fade-in-spin { animation: fadeIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
+
+/* lifted contact shadow under each star */
+.lift-shadow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80%;
+  height: 58%;
+  transform: translate(-50%, -30%) scale(1);
+  border-radius: 50%;
+  filter: blur(10px);
+  background: radial-gradient(50% 60% at 50% 50%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0) 70%);
+  opacity: 0.7;
+  z-index: 0;
+  pointer-events: none;
 }
-.shape-button:hover { filter: brightness(1.0) drop-shadow(0 12px 24px rgba(0,0,0,0.55)); }
+
+@keyframes shadowOut { 0% { opacity: .7; transform: translate(-50%, -30%); } 100% { opacity: .2; transform: translate(-50%, -38%); } }
+@keyframes shadowIn  { 0% { opacity: .2; transform: translate(-50%, -38%);} 100% { opacity: .7; transform: translate(-50%, -30%);} }
+
+.spin-out-fade .lift-shadow { animation: shadowOut 1s ease-in forwards; }
+.fade-in-spin .lift-shadow  { animation: shadowIn 1s ease-out forwards; }
+/* Completion glow */
+.completion-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(220px 180px at 50% 20%, rgba(255,255,255,0.12), rgba(255,255,255,0) 70%),
+              radial-gradient(320px 240px at 50% 60%, rgba(0, 217, 255, 0.12), rgba(0,0,0,0) 70%),
+              radial-gradient(420px 320px at 50% 80%, rgba(178, 141, 255, 0.12), rgba(0,0,0,0) 70%);
+  animation: glowFade 1200ms ease-out forwards; }
+@keyframes glowFade { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
+/* unobtrusive toast for completion */
+.completion-toast {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(20,20,20,0.8);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  z-index: 3;
+}
+.completion-toast .toast-text { font: 600 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; opacity: 0.9; }
+.completion-toast .toast-btn {
+  appearance: none;
+  border: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #2e2e2e;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.completion-toast .toast-btn:hover { filter: brightness(1.08); }
+
+/* Breather overlay */
+.breather-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+  z-index: 4;
+}
+.breather-overlay .countdown {
+  font: 900 clamp(48px, 12vw, 120px)/1 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  color: #e8e8e8;
+  text-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+.breather-overlay .breather-sub {
+  margin-top: -12px;
+  font: 700 clamp(12px, 2.6vw, 18px)/1 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* SVG highlight layers moved from inline styles */
+.edge-hl    { mix-blend-mode: screen; opacity: 0.8;    pointer-events: none; }
+.hot-hl     { mix-blend-mode: screen; opacity: 0.85;   pointer-events: none; }
+.liftTop-hl { mix-blend-mode: screen; opacity: 0.65;   pointer-events: none; }
+.rim-hl     { mix-blend-mode: screen; opacity: 0.5;    pointer-events: none; }
+.shade-hl   { mix-blend-mode: multiply; opacity: 0.6;  pointer-events: none; }
