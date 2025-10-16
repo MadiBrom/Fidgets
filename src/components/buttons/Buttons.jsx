@@ -112,7 +112,7 @@ const Buttons = () => {
           toastTimerRef.current = setTimeout(() => setShowToast(false), 2800);
 
           setPaused(true);
-          setCountdown(3);
+          setCountdown(5);
           if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
           breatherTimerRef.current = setInterval(() => {
             setCountdown(prev => {
@@ -173,19 +173,9 @@ const Buttons = () => {
         <span className="hud-label">{focusMode ? `${progress}/${target}` : "focus off"}</span>
       </div>
       {completed && <div className="completion-glow" aria-hidden="true" />}
-      {showToast && (
-        <div className="completion-toast" role="status" aria-live="polite">
-          <button
-            className="toast-btn"
-            onClick={() => {
-              setShowToast(false);
-              setProgress(0);
-            }}
-          >Again</button>
-        </div>
-      )}
       {paused && (
         <div className="breather-overlay" role="status" aria-live="polite">
+          <div className="breather-pulse" aria-hidden="true" />
           <div className="countdown">{countdown}</div>
           <div className="breather-sub">breather</div>
         </div>
@@ -194,13 +184,20 @@ const Buttons = () => {
         <button
           key={`${star.id}-${star.key}`}
           className={`shape-button ${star.phase === "out" ? "spin-out-fade" : ""} ${star.phase === "in" ? "fade-in-spin" : ""}`}
-          onClick={() => handleClick(star.id)}
+          onPointerDown={(e) => {
+            // Immediately make this star click-through and visually drop it beneath idles
+            e.currentTarget.style.pointerEvents = 'none';
+            e.currentTarget.style.zIndex = '0';
+            handleClick(star.id);
+          }}
           style={{
             top: `${star.position.top}px`,
             left: `${star.position.left}px`,
             width: `${star.size}px`,
             height: `${star.size}px`,
             color: star.color,
+            pointerEvents: star.phase === "idle" ? "auto" : "none",
+            zIndex: star.phase === "idle" ? 2 : 0
           }}
           aria-label={star.id}
         >
