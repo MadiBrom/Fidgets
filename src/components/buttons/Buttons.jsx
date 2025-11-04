@@ -117,7 +117,6 @@ const Buttons = () => {
     setStars(generated);
   }, []);
 
-  // Only reflect manual focus toggle; do not react to breathing pause
   const isManualBreak = !focusMode;
 
   useEffect(() => {

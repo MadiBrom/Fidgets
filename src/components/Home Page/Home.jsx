@@ -36,7 +36,6 @@ function Home() {
   const responsiveSize = () => (window.innerWidth < 640 ? 72 : 100);
   const [circleSize, setCircleSize] = useState(responsiveSize());
 
-  // progress goal + local stacking completions
   const GOAL = 20;
   const [totalCompletions, setTotalCompletions] = useState(0);
   const goalCountedRef = useRef(false);
@@ -90,7 +89,6 @@ function Home() {
     return () => { confettiRef.current = null; };
   }, []);
 
-  // load stored completions once
   useEffect(() => {
     try {
       const v = parseInt(localStorage.getItem("home_goal_completions") || "0", 10);
@@ -98,7 +96,6 @@ function Home() {
     } catch { /* ignore */ }
   }, []);
 
-  // count completion once per fill and celebrate
   useEffect(() => {
     if (circles.length >= GOAL && !goalCountedRef.current) {
       goalCountedRef.current = true;
@@ -168,23 +165,20 @@ function Home() {
         if (!f.swim && f.t >= f.explodeTime) {
           f.swim = true;
           f.speed = f.swimSpeed;
-          // capture current heading as starting swim heading
-          f.angle += 0; // no-op; keeps continuity
+          f.angle += 0;
         }
 
         if (!f.swim) {
-          // EXPLOSION PHASE: fast radial push with slight gravity/drag
           f.speed *= 1 - f.explodeDrag * dt;
-          const windX = tiltRef.current.x * 30; // px/s from tilt
+          const windX = tiltRef.current.x * 30;
           const windY = tiltRef.current.y * 15;
           f.vx = Math.cos(f.angle) * f.speed + windX;
           f.vy = Math.sin(f.angle) * f.speed + f.explodeGravity * dt + windY;
         } else {
-          // SWIM PHASE: oscillatory heading change + breeze
           const turn = Math.sin(f.t * f.freq + f.phase) * f.turnRate;
           f.angle += turn * dt;
           f.speed *= 1 - f.drag * dt;
-          const windX = tiltRef.current.x * 40; // slightly stronger in swim
+          const windX = tiltRef.current.x * 40;
           const windY = tiltRef.current.y * 20;
           f.vx = Math.cos(f.angle) * f.speed + f.breezeX + windX;
           f.vy = Math.sin(f.angle) * f.speed + f.breezeY + f.gravity * dt + windY;
@@ -193,17 +187,14 @@ function Home() {
         f.x += f.vx * dt;
         f.y += f.vy * dt;
 
-        // life fade
         f.life -= dt;
         const alpha = Math.max(0, Math.min(1, f.life / f.maxLife)) * f.alpha;
 
-        // cull offscreen or dead
         if (f.life <= 0 || f.x < -20 || f.y < -20 || f.x > window.innerWidth + 20 || f.y > window.innerHeight + 20) {
           fish.splice(i, 1);
           continue;
         }
 
-        // draw spark
         ctx.save();
         ctx.fillStyle = `rgba(255,255,255,${alpha})`;
         ctx.beginPath();
@@ -224,27 +215,23 @@ function Home() {
   }, []);
 
   const spawnFlyingFishAt = (px, py, countHint) => {
-    // viewport scaling
     const s = Math.min(1.25, Math.max(0.75, window.innerWidth / 1280));
-    const base = countHint && countHint > 0 ? countHint : 52; // match pop by default
-    const count = Math.max(10, Math.round(base * s)); // number of fish
+    const base = countHint && countHint > 0 ? countHint : 52;
+    const count = Math.max(10, Math.round(base * s));
 
     for (let i = 0; i < count; i++) {
-      // explode: random ring with slight upward bias, but allow all directions
       const biasUp = Math.random() < 0.6;
       const baseAngleDeg = biasUp ? 240 + Math.random() * 100 : Math.random() * 360;
       const angle = (baseAngleDeg * Math.PI) / 180;
 
-      // stronger radial kick so it clearly explodes before swimming
       const r0 = 12 + Math.random() * 18;
       const startX = px + Math.cos(angle) * r0;
       const startY = py + Math.sin(angle) * r0;
 
-      // speeds: fast explode, then slower swim
-      const explodeSpeed = 540 + Math.random() * 160; // px/s
-      const swimSpeed = 180 + Math.random() * 120; // px/s
+      const explodeSpeed = 540 + Math.random() * 160;
+      const swimSpeed = 180 + Math.random() * 120;
       const size = (0.9 + Math.random() * 0.6) * (s * 0.9 + 0.2);
-      const maxLife = 0.7 + Math.random() * 0.35; // seconds: dissipate before confetti fades
+      const maxLife = 0.7 + Math.random() * 0.35; 
 
       const fish = {
         x: startX,
@@ -257,19 +244,16 @@ function Home() {
         t: 0,
         maxLife,
         life: maxLife,
-        // explosion timing then frantic swim
         explodeTime: 0.12 + Math.random() * 0.12,
         explodeGravity: 280 + Math.random() * 80,
         explodeDrag: 0.25 + Math.random() * 0.15,
         swim: false,
         swimSpeed,
-        // more frantic swim: higher freq + turn
-        freq: 8 + Math.random() * 7, // wiggles per second
+        freq: 8 + Math.random() * 7, 
         phase: Math.random() * Math.PI * 2,
-        turnRate: 3.2 + Math.random() * 3.0, // radians/sec amplitude
+        turnRate: 3.2 + Math.random() * 3.0,
         drag: 0.38 + Math.random() * 0.25,
-        gravity: 120 + Math.random() * 50, // px/s^2 (applied scaled by dt)
-        // breeze for diverging paths (tilt adds on top in loop)
+        gravity: 120 + Math.random() * 50, 
         breezeX: (Math.random() * 60 - 30) * (0.5 + Math.random() * 0.7),
         breezeY: (Math.random() * 20 - 10) * 0.4,
         alpha: 0.95
@@ -278,7 +262,6 @@ function Home() {
     }
   };
 
-  // clear any scheduled fish timers on unmount
   useEffect(() => {
     return () => {
       fishTimersRef.current.forEach(t => clearTimeout(t));
@@ -289,18 +272,16 @@ function Home() {
   const launchFlyingFish = origin => {
     if (!confettiRef.current) return;
 
-    // lightweight scaling for different viewport widths
     const s = Math.min(1.15, Math.max(0.85, window.innerWidth / 1280));
 
-    const trails = 3 + Math.floor(Math.random() * 2); // 3-4 trails
+    const trails = 3 + Math.floor(Math.random() * 2);
     for (let t = 0; t < trails; t++) {
-      // Upward-biased launch so fish swim up and away
       const roll = Math.random();
-      const baseAngle = roll < 0.75 ? 260 + Math.random() * 50 : Math.random() * 360; // degrees
-      const bend = 6 + Math.random() * 12; // slight turn
+      const baseAngle = roll < 0.75 ? 260 + Math.random() * 50 : Math.random() * 360; 
+      const bend = 6 + Math.random() * 12; 
       const driftBase = (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.75);
 
-      const pc = Math.max(5, Math.round(7 * s)); // particles per pulse
+      const pc = Math.max(5, Math.round(7 * s)); 
       const velBase = (24 + Math.random() * 8) * (0.9 + 0.2 * s);
       const ticksBase = Math.round(140 * (0.9 + 0.2 * s));
 
@@ -330,7 +311,6 @@ function Home() {
         fishTimersRef.current.push(timeout);
       });
 
-      // soft crackle at the end of the fish run
       const crackle = setTimeout(() => {
         if (!confettiRef.current) return;
         confettiRef.current({
@@ -363,33 +343,28 @@ function Home() {
       y: centerWinY / window.innerHeight
     };
 
-    // estimate travel for a given velocity, decay, and ticks
     const estTravel = (v0, decay, ticks) =>
       v0 * (1 - Math.pow(decay, ticks)) / (1 - decay);
 
-    // colorful burst reference
     const colorfulV = 20;
     const colorfulDecay = 0.9;
     const colorfulTicks = 240;
     const colorfulMax = estTravel(colorfulV, colorfulDecay, colorfulTicks);
 
-    // solve ticks so sparks stay inside the colorful travel
     const solveTicks = (v0, decay, maxDist) => {
       const a = 1 - (maxDist * (1 - decay)) / v0;
       const clamped = Math.min(Math.max(a, 0.0001), 0.9999);
       return Math.max(6, Math.floor(Math.log(clamped) / Math.log(decay)));
     };
 
-    // scale visual intensity with circle size, normalized per device class
     const baseSize = window.innerWidth < 640 ? 72 : 100;
     const sizeScale = clamp(0.8, circle.size / baseSize, 1.6);
     const c1 = Math.max(60, Math.round(120 * sizeScale));
     const c2 = Math.max(8, Math.round(14 * sizeScale));
-    const scalar1 = 0.9 + 0.3 * sizeScale; // particle size
+    const scalar1 = 0.9 + 0.3 * sizeScale;
     const scalar2 = scalar1 * 1.2;
     const v = 18 + 3 * (sizeScale - 1);
 
-    // colorful burst scaled
     confettiRef.current({
       particleCount: c1,
       spread: 360,
@@ -411,14 +386,10 @@ function Home() {
       colors: CONFETTI
     });
 
-    // single-system white particles: explode first, then swim (count scaled)
     const fishBase = Math.max(28, Math.round(52 * sizeScale));
     spawnFlyingFishAt(centerWinX, centerWinY, fishBase);
   };
 
-  // removed one-time center circle spawn; we render a persistent spawner instead
-
-  // spawn a new draggable circle from the center spawner
   const onSpawnerPointerDown = e => {
     e.preventDefault();
     e.stopPropagation();
@@ -433,9 +404,8 @@ function Home() {
       if (!spawnerTrackRef.current.active || spawnerTrackRef.current.createdId) return;
       const dx = ev.clientX - spawnerTrackRef.current.startX;
       const dy = ev.clientY - spawnerTrackRef.current.startY;
-      if (dx * dx + dy * dy < 36) return; // 6px threshold
+      if (dx * dx + dy * dy < 36) return;
 
-      // Create a new circle at center and start dragging it
       const w = rect.width;
       const h = rect.height;
       const size = circleSize;
@@ -450,7 +420,6 @@ function Home() {
       };
       spawnerTrackRef.current.createdId = newCircle.id;
       setCircles(prev => [...prev, newCircle]);
-      // auto-advance spawner color for the next placement
       setSpawnerColor(prev => nextPaletteColor(prev));
 
       const px = ev.clientX - rect.left;
@@ -463,7 +432,6 @@ function Home() {
     const handleUp = () => {
       const tracker = spawnerTrackRef.current;
       if (tracker.active && !tracker.createdId) {
-        // Treat as a click: explode at center
         const w = rect.width;
         const h = rect.height;
         const size = circleSize;
@@ -471,7 +439,6 @@ function Home() {
         const cy = (h - size) / 2;
         const tempCircle = { x: cx, y: cy, size };
         fireBurstAtCircleCenter(tempCircle);
-        // advance spawner color only when center is clicked (not when dragging)
         const idx = PALETTE.indexOf(spawnerColor);
         const next = idx >= 0 ? PALETTE[(idx + 1) % PALETTE.length] : pickColor();
         setSpawnerColor(next);
@@ -487,7 +454,6 @@ function Home() {
     window.addEventListener("pointercancel", handleUp);
   };
 
-  // start drag
   const onPointerDown = (e, id) => {
     e.preventDefault();
     e.stopPropagation();
@@ -503,11 +469,9 @@ function Home() {
 
     setDragOffset({ x: px - circle.x, y: py - circle.y });
     setDragId(id);
-    // remember starting circle position to decide if it was a real drag
     dragStartRef.current = { x: circle.x, y: circle.y };
   };
 
-  // global drag listeners
   useEffect(() => {
     if (!dragId) return;
 
@@ -521,7 +485,6 @@ function Home() {
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
 
-      // bounds use THIS circle's own size
       const minX = 8;
       const minY = 8;
       const maxX = rect.width - c.size - 8;
@@ -536,7 +499,6 @@ function Home() {
     const handleUp = () => {
       const circle = circlesRef.current.find(c => c.id === dragId);
       if (circle) {
-        // Always explode on release of a circle (click or drag)
         fireBurstAtCircleCenter(circle);
       }
       setDragId(null);
@@ -553,7 +515,6 @@ function Home() {
     };
   }, [dragId, dragOffset]);
 
-  // interactive title follow with easing
   useEffect(() => {
     const updateTarget = e => {
       const x = (e.clientX / window.innerWidth) * 100;
@@ -578,11 +539,10 @@ function Home() {
     };
   }, []);
 
-  // mobile tilt-as-hover (and slight wind influence for fish)
   useEffect(() => {
     const handleOrientation = (e) => {
-      const beta = e.beta ?? 0;  // front/back [-90..90]
-      const gamma = e.gamma ?? 0; // left/right [-90..90]
+      const beta = e.beta ?? 0;  
+      const gamma = e.gamma ?? 0;
       const nx = Math.max(-1, Math.min(1, gamma / 45));
       const ny = Math.max(-1, Math.min(1, beta / 45));
       tiltRef.current = { x: nx, y: ny };
@@ -624,7 +584,6 @@ function Home() {
 
   return (
     <div className="home">
-      {/* fixed overlay canvas for bursts */}
       <canvas
         ref={canvasRef}
         style={{
@@ -638,7 +597,6 @@ function Home() {
         aria-hidden="true"
       />
 
-      {/* custom fish overlay canvas */}
       <canvas
         ref={fishCanvasRef}
         style={{
@@ -691,7 +649,6 @@ function Home() {
             </div>
           </div>
         )}
-        {/* Persistent center spawner (non-draggable), always centered */}
         <div
           className="circle"
           onPointerDown={onSpawnerPointerDown}
