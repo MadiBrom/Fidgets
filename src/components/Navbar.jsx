@@ -53,7 +53,7 @@ const Navbar = () => {
               aria-expanded={fidgetsOpen}
               aria-controls="fidgets-menu"
             >
-              Fidgets â–¾
+              Fidgets ▾
             </button>
             {fidgetsOpen && (
               <ul id="fidgets-menu" className="dropdown-menu">
@@ -74,7 +74,7 @@ const Navbar = () => {
               aria-expanded={visualsOpen}
               aria-controls="visuals-menu"
             >
-              Visuals â–¾
+              Visuals ▾
             </button>
             {visualsOpen && (
               <ul id="visuals-menu" className="dropdown-menu">
@@ -108,7 +108,7 @@ const Navbar = () => {
           <div className="menu-panel">
             <div className="menu-header">
               <span className="menu-title">Menu</span>
-              <button className="menu-close" aria-label="Close menu" onClick={closeMobile}>âœ•</button>
+              <button className="menu-close" aria-label="Close menu" onClick={closeMobile}>✕</button>
             </div>
 
             <div className="menu-section">

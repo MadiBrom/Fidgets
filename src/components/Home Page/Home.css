@@ -64,13 +64,17 @@ body {
 }
 
 .hud {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: 60px;
+  z-index: 1000;
+  display: inline-flex;
+  gap: 8px;
   align-items: center;
-  width: min(92vw, 620px);
+  transition: opacity 160ms ease;
 }
+
+body.menu-open .hud { opacity: 0; pointer-events: none; }
 
 .progress {
   position: relative;

@@ -617,20 +617,16 @@ function Home() {
 
 
         {(() => {
-          const progress = Math.min(circles.length, GOAL);
-          const done = progress >= GOAL;
-          const pct = Math.round((progress / GOAL) * 100);
           return (
             <div className="hud" role="status" aria-live="polite">
-              <div className="hud-left" title="Total completions">
-                <span className="hud-star" aria-hidden="true">â˜…</span>
-                <span className="hud-count" aria-label={`Total completions ${totalCompletions}`}>{totalCompletions}</span>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <div className="hud-left" title="Dot count">
+                  <span className="hud-star" aria-hidden="true">◯</span>
+                  <span className="hud-count" aria-label={`Dot count ${circles.length}`}>{circles.length}</span>
+                </div>
+                <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
               </div>
-              <div className="progress" aria-label="circle progress">
-                <div className="progress-fill" style={{ width: `${pct}%` }} />
-              </div>
-              <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">â†º</button>
-              <span className="sr-only">{pct}%</span>
+              <span className="sr-only">Dot count {circles.length}</span>
             </div>
           );
         })()}
