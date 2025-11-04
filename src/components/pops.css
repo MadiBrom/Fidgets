@@ -1,4 +1,4 @@
-.popfield {
+﻿.popfield {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,7 +14,7 @@
   background: rgba(173, 216, 230, 0.7);
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(173, 216, 230, 0.5);
-  transition: transform 0s, top 0s, left 0s; /* Instant position change */
+  transition: transform 0s, top 0s, left 0s; 
   pointer-events: auto;
   cursor: pointer;
 }

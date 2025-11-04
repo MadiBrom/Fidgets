@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+﻿import React, { useEffect, useRef } from "react";
 
 const Birds = () => {
   const bubblefieldRef = useRef(null);
@@ -8,7 +8,7 @@ const Birds = () => {
     const bubblefield = bubblefieldRef.current;
     const bubbleCount = 400;
 
-    // Function to make shapes float around smoothly across the whole screen
+    
     const floatBubble = (bubble) => {
       const moveBubble = () => {
         const deltaX = (Math.random() * 2 - 1) * 0.2;
@@ -120,9 +120,9 @@ const Birds = () => {
         .bubble {
           position: absolute;
           border-radius: 50%;
-          background: rgba(0, 0, 0, 0.5); /* Soft blue */
-          box-shadow: 0 0 6px rgba(0, 123, 255, 0.7); /* Subtle glow */
-          transition: transform 0.3s ease; /* Smooth transformation */
+          background: rgba(0, 0, 0, 0.5); 
+          box-shadow: 0 0 6px rgba(0, 123, 255, 0.7); 
+          transition: transform 0.3s ease; 
         }
       `}</style>
     </div>

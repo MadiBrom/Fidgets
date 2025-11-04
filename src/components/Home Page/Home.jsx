@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import "./Home.css";
 
@@ -93,7 +93,7 @@ function Home() {
     try {
       const v = parseInt(localStorage.getItem("home_goal_completions") || "0", 10);
       setTotalCompletions(Number.isFinite(v) ? v : 0);
-    } catch { /* ignore */ }
+    } catch {  }
   }, []);
 
   useEffect(() => {
@@ -623,13 +623,13 @@ function Home() {
           return (
             <div className="hud" role="status" aria-live="polite">
               <div className="hud-left" title="Total completions">
-                <span className="hud-star" aria-hidden="true">★</span>
+                <span className="hud-star" aria-hidden="true">â˜…</span>
                 <span className="hud-count" aria-label={`Total completions ${totalCompletions}`}>{totalCompletions}</span>
               </div>
               <div className="progress" aria-label="circle progress">
                 <div className="progress-fill" style={{ width: `${pct}%` }} />
               </div>
-              <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
+              <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">â†º</button>
               <span className="sr-only">{pct}%</span>
             </div>
           );

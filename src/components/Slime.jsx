@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+﻿import React, { useEffect, useRef } from "react";
 
 const Slime = () => {
   const bubblefieldRef = useRef(null);
@@ -8,21 +8,21 @@ const Slime = () => {
     const bubblefield = bubblefieldRef.current;
     const bubbleCount = 300;
 
-    // Function to make shapes float around smoothly across the whole screen
+    
     const floatBubble = (bubble) => {
       const moveBubble = () => {
-        // Adjust the randomness to be smaller for slower motion
+        
         const deltaX = (Math.random() * 2 - 1) * 0.2;
         const deltaY = (Math.random() * 2 - 1) * 0.2;
 
-        // Apply damping for smoother, slower float effect
+        
         bubble.velocityX = (bubble.velocityX || 0) * 0.99 + deltaX;
         bubble.velocityY = (bubble.velocityY || 0) * 0.99 + deltaY;
 
         let newX = parseFloat(bubble.style.left) + bubble.velocityX;
         let newY = parseFloat(bubble.style.top) + bubble.velocityY;
 
-        // Wrap around if out of bounds
+        
         if (newX < 0) newX = window.innerWidth;
         if (newX > window.innerWidth) newX = 0;
         if (newY < 0) newY = window.innerHeight;
@@ -37,11 +37,11 @@ const Slime = () => {
       moveBubble();
     };
 
-    // Function to create a bubble element
+    
     const createBubble = () => {
       const bubble = document.createElement("div");
 
-      // Randomly assign a class for different types, but style them all as circles
+      
       const shapeTypes = ["bubble", "square", "triangle"];
       const shapeClass =
         shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
@@ -58,12 +58,12 @@ const Slime = () => {
       floatBubble(bubble);
     };
 
-    // Create initial bubbles
+    
     for (let i = 0; i < bubbleCount; i++) {
       createBubble();
     }
 
-    // Handle mouse movement to attract bubbles
+    
     const handleMouseMove = (event) => {
       const mouseX = event.clientX;
       const mouseY = event.clientY;
@@ -74,7 +74,7 @@ const Slime = () => {
         const deltaX = mouseX - bubbleX;
         const deltaY = mouseY - bubbleY;
         const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-        const attractionSpeed = 30; // Slower attraction for smoother behavior
+        const attractionSpeed = 30; 
 
         if (distance > 0) {
           const moveX = (deltaX / distance) * attractionSpeed;
@@ -86,7 +86,7 @@ const Slime = () => {
       });
     };
 
-    // Handle mouse click to repulse nearby bubbles
+    
     const handleMouseClick = (event) => {
       const mouseX = event.clientX;
       const mouseY = event.clientY;

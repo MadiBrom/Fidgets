@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 
@@ -27,7 +27,7 @@ const Navbar = () => {
     closeAll();
   };
 
-  // Add/remove a body class so pages can respond (e.g., hide HUDs under the drawer)
+  
   React.useEffect(() => {
     if (mobileOpen) document.body.classList.add("menu-open");
     else document.body.classList.remove("menu-open");
@@ -36,7 +36,7 @@ const Navbar = () => {
 
   return (
     <header className="site-header" role="banner">
-      {/* Desktop / tablet nav */}
+      
       <nav className="navbar" aria-label="Primary">
         <ul className="nav-list">
           <li className="nav-item">
@@ -53,7 +53,7 @@ const Navbar = () => {
               aria-expanded={fidgetsOpen}
               aria-controls="fidgets-menu"
             >
-              Fidgets ▾
+              Fidgets â–¾
             </button>
             {fidgetsOpen && (
               <ul id="fidgets-menu" className="dropdown-menu">
@@ -74,21 +74,21 @@ const Navbar = () => {
               aria-expanded={visualsOpen}
               aria-controls="visuals-menu"
             >
-              Visuals ▾
+              Visuals â–¾
             </button>
             {visualsOpen && (
               <ul id="visuals-menu" className="dropdown-menu">
                 <li><Link className="dropdown-link" to="/ocean" onClick={closeAll}>Ocean</Link></li>
                 <li><Link className="dropdown-link" to="/rainbow" onClick={closeAll}>Rainbow</Link></li>
                 <li><Link className="dropdown-link" to="/drips" onClick={closeAll}>Drips</Link></li>
-                {/* <li><Link className="dropdown-link" to="/spiral" onClick={closeAll}>Spiral</Link></li> */}
+                
               </ul>
             )}
           </li>
         </ul>
       </nav>
 
-      {/* Mobile icon that does not affect layout height */}
+      
       <button
         className="menu-icon"
         aria-label="Open menu"
@@ -96,19 +96,19 @@ const Navbar = () => {
         aria-controls="mobile-menu"
         onClick={() => setMobileOpen(true)}
       >
-        {/* simple svg burger */}
+        
         <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
       </button>
 
-      {/* Mobile overlay menu */}
+      
       {mobileOpen && (
         <div id="mobile-menu" className="menu-overlay" role="dialog" aria-modal="true">
           <div className="menu-panel">
             <div className="menu-header">
               <span className="menu-title">Menu</span>
-              <button className="menu-close" aria-label="Close menu" onClick={closeMobile}>✕</button>
+              <button className="menu-close" aria-label="Close menu" onClick={closeMobile}>âœ•</button>
             </div>
 
             <div className="menu-section">
@@ -132,7 +132,7 @@ const Navbar = () => {
                 <Link className="menu-link" to="/ocean" onClick={closeMobile}>Ocean</Link>
                 <Link className="menu-link" to="/rainbow" onClick={closeMobile}>Rainbow</Link>
                 <Link className="menu-link" to="/drips" onClick={closeMobile}>Drips</Link>
-                {/* <Link className="menu-link" to="/spiral" onClick={closeMobile}>Spiral</Link> */}
+                
               </nav>
             </details>
           </div>

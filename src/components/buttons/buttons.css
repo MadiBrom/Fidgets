@@ -1,4 +1,4 @@
-.buttons-root,
+﻿.buttons-root,
 :root {
   --bg: #0b0b0b;
   --surface: #141414;
@@ -11,11 +11,11 @@
 .shapes-container {
   position: relative;
   width: 100vw;
-  height: 100dvh; /* true device viewport height */
+  height: 100dvh; 
   overflow: hidden;
   background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
 }
-/* Focus HUD */
+
 .focus-hud { position: absolute; left: 50%; transform: translateX(-50%);
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
   background: color-mix(in oklab, var(--surface), transparent 35%);
@@ -27,7 +27,7 @@
 .focus-hud .hud-bar { width: min(72vw, 560px); height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
 .focus-hud .hud-bar-fill { height:100%; background: linear-gradient(90deg,#00E5FF,#6C3BFF,#FF00FF); transition: width .25s ease; }
 
-/* Pill toggle control */
+
 .pill-toggle { position: relative; width: 76px; height: 36px; border-radius: 999px; border: 1px solid var(--ring);
   background: transparent; padding: 0; cursor: pointer; outline: none; display: inline-flex; align-items: center; justify-content: flex-start; }
 .pill-toggle .pill-track { position: absolute; inset: 0; border-radius: inherit; background: color-mix(in oklab, var(--surface), transparent 10%);
@@ -40,7 +40,7 @@
 .pill-toggle.break .pill-knob { left: calc(100% - 32px); }
 .pill-toggle:hover .pill-knob { box-shadow: inset 0 2px 6px rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.35); }
 
-/* Top popdown tag */
+
 .top-popdown { position: fixed; left: 50%; transform: translateX(-50%);
   top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 200;
   padding: 8px 14px; border-radius: 999px; border: 1px solid var(--ring);
@@ -54,32 +54,32 @@
 @keyframes popTag { 0% { opacity: 0; transform: translate(-50%, -8px); } 12% { opacity: 1; transform: translate(-50%, 0); }
   80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
 
-/* Screen-reader only utility */
+
 .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important;
   overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
-/* Avoid overlap with navbar/menu icon */
+
 @media (max-width: 640px){ .focus-hud { top: 64px; } }
 @media (min-width: 641px){ .focus-hud { top: 16px; } }
 
-/* General button styling */
+
 .shape-button {
   position: absolute;
   border: none;
   cursor: pointer;
-  background: none; /* remove visible bubble */
+  background: none; 
   outline: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: transform 0s, top 0s, left 0s; /* No smooth transition while moving to the new location */
+  transition: transform 0s, top 0s, left 0s; 
   color: var(--text);
   filter: drop-shadow(0 14px 22px rgba(0,0,0,0.6));
   touch-action: manipulation;
   position: absolute;
 }
 
-/* Restore button wrapper styling to avoid white focus/active rectangles */
+
 .shape-button {
   position: absolute;
   border: 0;
@@ -89,7 +89,7 @@
   outline: none;
   display: block;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent; /* iOS/Android remove white tap square */
+  -webkit-tap-highlight-color: transparent; 
   box-shadow: none;
 }
 .shape-button:focus,
@@ -97,11 +97,11 @@
 .shape-button:active { outline: none; box-shadow: none; }
 .shape-button::-moz-focus-inner { border: 0; }
 
-/* SVG wrapper sizing; allow pointer events so inner path can handle clicks */
+
 .star-shape { width: 88%; height: 88%; display: block; pointer-events: visiblePainted; -webkit-tap-highlight-color: transparent; }
 
-/* Spin-out and fade-out animation */
-/* Separate rotation (applied to star geometry) and opacity (applied to button) */
+
+
 @keyframes starSpinOut { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes starSpinIn  { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeOut     { 0% { opacity: 1; } 100% { opacity: 0; } }
@@ -118,16 +118,16 @@
 .fade-in-spin { animation: fadeIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
 .fade-in-spin .spin-geo { animation: starSpinIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
 
-/* subtle lighting modulation during spin */
+
 .spin-out-fade .star-shape + rect[clip-path],
 .spin-out-fade rect[clip-path] + rect[clip-path] { animation: edgeOut 1s ease-in forwards, hotOut 1s ease-in forwards; }
 .fade-in-spin .star-shape + rect[clip-path],
 .fade-in-spin rect[clip-path] + rect[clip-path] { animation: edgeIn 1s ease-out forwards, hotIn 1s ease-out forwards; }
 
-/* remove jelly scale to keep shape constant */
+
 .fade-in-spin { animation: fadeIn 1s cubic-bezier(.2,.9,.3,1) forwards; }
 
-/* lifted contact shadow under each star */
+
 .lift-shadow {
   position: absolute;
   left: 50%;
@@ -148,7 +148,7 @@
 
 .spin-out-fade .lift-shadow { animation: shadowOut 1s ease-in forwards; }
 .fade-in-spin .lift-shadow  { animation: shadowIn 1s ease-out forwards; }
-/* Completion glow */
+
 .completion-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: radial-gradient(220px 180px at 50% 20%, rgba(255,255,255,0.12), rgba(255,255,255,0) 70%),
               radial-gradient(320px 240px at 50% 60%, rgba(0, 217, 255, 0.12), rgba(0,0,0,0) 70%),
@@ -156,7 +156,7 @@
   animation: glowFade 1200ms ease-out forwards; }
 @keyframes glowFade { 0% { opacity: 0.9; } 100% { opacity: 0; } }
 
-/* unobtrusive toast for completion */
+
 .completion-toast {
   position: absolute;
   top: 56px;
@@ -184,7 +184,7 @@
 }
 .completion-toast .toast-btn:hover { filter: brightness(1.08); }
 
-/* Breather overlay */
+
 .breather-overlay {
   position: absolute;
   inset: 0;
@@ -208,14 +208,14 @@
   width: clamp(240px, 46vw, 460px);
   height: clamp(240px, 46vw, 460px);
   border-radius: 50%;
-  /* crisp ring using background mask */
+  
   background:
     radial-gradient(closest-side, transparent calc(50% - 2px), rgba(255,255,255,0.9) calc(50% - 2px) calc(50% + 2px), transparent calc(50% + 2px));
   transition: transform 4000ms ease-in-out;
-  transform: scale(1.05); /* start a bit larger so text never clips */
+  transform: scale(1.05); 
   pointer-events: none;
 }
-/* subtle wavy edge via pseudo elements */
+
 .breather-overlay .breather-ring::before,
 .breather-overlay .breather-ring::after {
   content: "";
@@ -230,11 +230,11 @@
 .breather-overlay .breather-ring::before { animation: wobble 6s linear infinite; opacity: 0.65; }
 .breather-overlay .breather-ring::after  { animation: wobble2 7.5s linear infinite; opacity: 0.45; }
 
-/* phase-controlled transforms */
+
 .breather-overlay .breather-ring.in  { transform: scale(1.18); }
 .breather-overlay .breather-ring.out { transform: scale(1.05); }
 
-/* inner fill that grows/shrinks with phase */
+
 .breather-overlay .breather-fill {
   position: absolute;
   width: clamp(240px, 46vw, 460px);
@@ -248,13 +248,13 @@
 .breather-overlay .breather-fill.in  { transform: scale(1.10); opacity: 0.42; }
 .breather-overlay .breather-fill.out { transform: scale(0.92); opacity: 0.22; }
 
-/* Intro word-by-word flash */
+
 .breather-sub.flash .intro-word { opacity: 0; animation: flashWord 600ms ease forwards; }
 @keyframes flashWord { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes wobble  { 0% { transform: rotate(0deg)   scaleX(1.02) scaleY(0.98); } 100% { transform: rotate(360deg) scaleX(0.98) scaleY(1.02); } }
 @keyframes wobble2 { 0% { transform: rotate(0deg)   scaleX(0.97) scaleY(1.03); } 100% { transform: rotate(-360deg) scaleX(1.03) scaleY(0.97); } }
 .breather-overlay .countdown {
-  display: none; /* hidden per new guidance */
+  display: none; 
 }
 .breather-overlay .breather-sub {
   position: absolute;
@@ -272,7 +272,7 @@
   pointer-events: none;
 }
 
-/* SVG highlight layers moved from inline styles */
+
 .edge-hl    { mix-blend-mode: screen; opacity: 0.8;    pointer-events: none; }
 .hot-hl     { mix-blend-mode: screen; opacity: 0.85;   pointer-events: none; }
 .liftTop-hl { mix-blend-mode: screen; opacity: 0.65;   pointer-events: none; }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+﻿import React, { useRef, useEffect, useState } from "react";
 
 const Drips = () => {
   const canvasRef = useRef(null);
@@ -24,7 +24,7 @@ const Drips = () => {
 
     window.addEventListener("resize", resizeCanvas);
 
-    // Function to create multiple ripples at random positions
+    
     function createRipples() {
       const newRipples = Array.from({ length: 5 }, () => ({
         x: Math.random() * width,
@@ -35,10 +35,10 @@ const Drips = () => {
       setRipples((prevRipples) => [...prevRipples, ...newRipples]);
     }
 
-    // Generate ripples at regular intervals (simulating raindrops)
-    const dropInterval = setInterval(createRipples, 100); // Adjust interval for more or fewer drops
+    
+    const dropInterval = setInterval(createRipples, 100); 
 
-    // Function to handle mouse clicks and add a larger ripple
+    
     function handleClick(event) {
       const rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
@@ -47,8 +47,8 @@ const Drips = () => {
       const largeRipple = {
         x: x,
         y: y,
-        radius: 10, // Starting radius for large drip
-        alpha: 0.8, // Starting opacity for the large drip
+        radius: 10, 
+        alpha: 0.8, 
       };
 
       setRipples((prevRipples) => [...prevRipples, largeRipple]);
@@ -62,17 +62,17 @@ const Drips = () => {
       ripples.forEach((ripple, index) => {
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, ripple.radius, 0, 2 * Math.PI);
-        // Light blue color for the ripples
-        ctx.strokeStyle = `rgba(173, 216, 230, ${ripple.alpha})`; // Light blue color with varying transparency
+        
+        ctx.strokeStyle = `rgba(173, 216, 230, ${ripple.alpha})`; 
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Increase the ripple's radius
+        
         ripple.radius += rippleSpeed;
-        // Decrease the ripple's alpha to fade out as it grows
+        
         ripple.alpha -= 0.01;
 
-        // Remove ripples that have fully faded
+        
         if (ripple.alpha <= 0) {
           ripples.splice(index, 1);
         }
