@@ -27,6 +27,37 @@
 .focus-hud .hud-bar { width: min(72vw, 560px); height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
 .focus-hud .hud-bar-fill { height:100%; background: linear-gradient(90deg,#00E5FF,#6C3BFF,#FF00FF); transition: width .25s ease; }
 
+/* Pill toggle control */
+.pill-toggle { position: relative; width: 76px; height: 36px; border-radius: 999px; border: 1px solid var(--ring);
+  background: transparent; padding: 0; cursor: pointer; outline: none; display: inline-flex; align-items: center; justify-content: flex-start; }
+.pill-toggle .pill-track { position: absolute; inset: 0; border-radius: inherit; background: color-mix(in oklab, var(--surface), transparent 10%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); transition: background .2s ease, box-shadow .2s ease; }
+.pill-toggle.focus .pill-track { background: linear-gradient(90deg,#00E5FF,#6C3BFF,#FF00FF); opacity: .85; }
+.pill-toggle.break .pill-track { background: linear-gradient(90deg,#24242c,#1a1a22); opacity: .95; }
+.pill-toggle .pill-knob { position: absolute; top: 50%; left: 4px; width: 28px; height: 28px; transform: translateY(-50%);
+  border-radius: 50%; background: #fff; box-shadow: inset 0 2px 6px rgba(0,0,0,.15), 0 4px 10px rgba(0,0,0,.25);
+  transition: left .18s cubic-bezier(.2,.8,.2,1), box-shadow .15s ease; }
+.pill-toggle.break .pill-knob { left: calc(100% - 32px); }
+.pill-toggle:hover .pill-knob { box-shadow: inset 0 2px 6px rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.35); }
+
+/* Top popdown tag */
+.top-popdown { position: fixed; left: 50%; transform: translateX(-50%);
+  top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 200;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--ring);
+  font: 700 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; color: var(--text);
+  background: color-mix(in oklab, var(--surface), transparent 15%);
+  backdrop-filter: saturate(140%) blur(8px); -webkit-backdrop-filter: saturate(140%) blur(8px);
+  box-shadow: 0 12px 28px var(--shadow);
+  animation: popTag 1000ms ease forwards; pointer-events: none; }
+.top-popdown.on { background: color-mix(in oklab, #0dbf9b, transparent 45%); }
+.top-popdown.off { background: color-mix(in oklab, #444, transparent 55%); }
+@keyframes popTag { 0% { opacity: 0; transform: translate(-50%, -8px); } 12% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
+
+/* Screen-reader only utility */
+.sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important;
+  overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
+
 /* Avoid overlap with navbar/menu icon */
 @media (max-width: 640px){ .focus-hud { top: 64px; } }
 @media (min-width: 641px){ .focus-hud { top: 16px; } }

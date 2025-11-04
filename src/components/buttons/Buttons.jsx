@@ -89,6 +89,11 @@ const Buttons = () => {
   const [introIndex, setIntroIndex] = useState(0);
   const introWordTimerRef = useRef(null);
   const [showGame, setShowGame] = useState(true);
+  const [showTopTag, setShowTopTag] = useState(false);
+  const [topTagText, setTopTagText] = useState("");
+  const topTagTimerRef = useRef(null);
+  const mountedRef = useRef(false);
+  const prevBreakRef = useRef(false);
 
   useEffect(() => {
     const vw = window.innerWidth;
@@ -112,11 +117,30 @@ const Buttons = () => {
     setStars(generated);
   }, []);
 
+  // Only reflect manual focus toggle; do not react to breathing pause
+  const isManualBreak = !focusMode;
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevBreakRef.current = isManualBreak;
+      return;
+    }
+    if (prevBreakRef.current !== isManualBreak) {
+      const text = isManualBreak ? "Free Click" : "Breathing Break Acvite";
+      setTopTagText(text);
+      setShowTopTag(true);
+      if (topTagTimerRef.current) clearTimeout(topTagTimerRef.current);
+      topTagTimerRef.current = setTimeout(() => setShowTopTag(false), 1000);
+      prevBreakRef.current = isManualBreak;
+    }
+  }, [isManualBreak]);
+
   const handleClick = (id) => {
     if (paused) return; 
     if (countedRef.current.has(id)) return;
-    const OUT_MS = 1000;
-    const IN_MS = 1000;
+    const OUT_MS = 3000;
+    const IN_MS = 3000;
 
   
     const t = timersRef.current.get(id);
@@ -219,6 +243,7 @@ const Buttons = () => {
     if (breatherTimerRef.current) clearInterval(breatherTimerRef.current);
     if (introTimeoutRef.current) clearTimeout(introTimeoutRef.current);
     if (introWordTimerRef.current) clearInterval(introWordTimerRef.current);
+    if (topTagTimerRef.current) clearTimeout(topTagTimerRef.current);
   }, []);
 
   const d = roundedStarPath({ points: 5, outer: 56, inner: 36, round: 14 });
@@ -226,12 +251,28 @@ const Buttons = () => {
   return (
     <div className="shapes-container">
 
+      {showTopTag && (
+        <div className={`top-popdown ${isManualBreak ? 'on' : 'off'}`} role="status" aria-live="polite">
+          {topTagText}
+        </div>
+      )}
+
       {!paused && (
-      <div className="focus-hud" onClick={() => setFocusMode(f => !f)} role="button" aria-label="Toggle focus mode">
+      <div className="focus-hud">
+        <button
+          className={`pill-toggle ${isManualBreak ? 'break' : 'focus'}`}
+          onClick={() => setFocusMode(f => !f)}
+          aria-label="Toggle breaktime"
+          aria-pressed={isManualBreak}
+        >
+          <span className="pill-track" aria-hidden="true" />
+          <span className="pill-knob" aria-hidden="true" />
+        </button>
         <div className="hud-bar">
           <div className="hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
         </div>
-        <span className="hud-label">{focusMode ? `${progress}/${target}` : "focus off"}</span>
+        <span className="hud-label">{`${progress}/${target}`}</span>
+        <span className="sr-only" aria-live="polite">{showTopTag ? topTagText : ""}</span>
       </div>
       )}
       {completed && <div className="completion-glow" aria-hidden="true" />}
