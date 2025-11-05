@@ -66,7 +66,7 @@ body {
 .hud {
   position: fixed;
   top: calc(12px + env(safe-area-inset-top, 0px));
-  right: 60px;
+  right: calc(56px + env(safe-area-inset-right, 0px));
   z-index: 1000;
   display: inline-flex;
   gap: 8px;
@@ -75,6 +75,15 @@ body {
 }
 
 body.menu-open .hud { opacity: 0; pointer-events: none; }
+
+@media (max-width: 480px){
+  .hud { top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(64px + env(safe-area-inset-right, 0px)); gap: 6px; }
+  .hud-left { padding: 2px 6px; height: 28px; }
+  .hud-count{ font: 800 0.92rem/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; }
+  .icon-btn, .reset-btn{ width: 28px; height: 28px; }
+  .hero { padding-top: 12px; }
+  .title { padding-right: calc(104px + env(safe-area-inset-right, 0px)); padding-bottom: 6px; font-size: clamp(1.7rem, 5.6vw, 2.4rem); line-height: 1.08; text-shadow: 0 1px 0 rgba(0,0,0,0.35); }
+}
 
 .progress {
   position: relative;
@@ -99,13 +108,13 @@ body.menu-open .hud { opacity: 0; pointer-events: none; }
 }
 .reset-btn { margin-left: 6px; }
 
-.hud-left { display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); }
+.hud-left { display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:10px; background: rgba(20,20,20,0.7); border: 1px solid var(--ring); }
 .hud-star{ color:#FFD400; text-shadow: 0 0 6px rgba(255,212,0,0.5); }
 .hud-count{ font: 800 0.85rem/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; }
-.icon-btn{ width:28px; height:28px; display:grid; place-items:center; border-radius:8px; padding:0; }
+.icon-btn{ width:28px; height:28px; display:grid; place-items:center; border-radius:10px; padding:0; background: rgba(20,20,20,0.7); border: 1px solid var(--ring); color: var(--text); }
 
 
-.reset-btn{ width:28px; height:28px; padding:0; display:grid; place-items:center; border-radius:8px; }
+.reset-btn{ width:28px; height:28px; padding:0; display:grid; place-items:center; border-radius:10px; }
 .reset-btn span{ font-size:16px; }
 .hud-msg { font-weight: 700; color: var(--text); }
 

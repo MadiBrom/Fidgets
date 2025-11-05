@@ -20,7 +20,9 @@
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
   background: color-mix(in oklab, var(--surface), transparent 35%);
   font: 600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; color: var(--text);
-  border: 1px solid var(--ring); border-radius: 999px; box-shadow: 0 6px 18px var(--shadow); }
+  border: 1px solid var(--ring); border-radius: 999px; box-shadow: 0 6px 18px var(--shadow);
+  max-width: min(92vw, 620px);
+}
 .focus-hud { z-index: 100; }
 .menu-overlay ~ .focus-hud, body.menu-open .focus-hud { opacity: 0; pointer-events: none; }
 .focus-hud .hud-label { opacity: 0.85; letter-spacing: 0.3px; }
@@ -61,6 +63,15 @@
 
 @media (max-width: 640px){ .focus-hud { top: 64px; } }
 @media (min-width: 641px){ .focus-hud { top: 16px; } }
+
+@media (max-width: 480px){
+  .focus-hud { gap: 6px; padding: 4px 8px; left: auto; right: calc(52px + env(safe-area-inset-right, 0px)); transform: none; top: calc(12px + env(safe-area-inset-top, 0px)); }
+  .pill-toggle { width: 60px; height: 28px; }
+  .pill-toggle .pill-knob { width: 22px; height: 22px; left: 3px; }
+  .pill-toggle.break .pill-knob { left: calc(100% - 25px); }
+  .focus-hud .hud-bar { width: 54vw; height: 5px; }
+  .focus-hud .hud-label { font-size: 13px; }
+}
 
 
 .shape-button {
