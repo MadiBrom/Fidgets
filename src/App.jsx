@@ -1,16 +1,16 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Slime from "./components/Slime";
-import Navbar from "./components/Navbar";
+import Navbar from "./navbar/Navbar";
 import Buttons from "./components/buttons/Buttons";
 import Birds from "./components/Birds";
-import Home from "./components/Home Page/Home";
-import Pops from "./components/Pops";
 import Lines from "./components/Lines";
 import Ocean from "./components/Ocean";
 import Rainbow from "./components/Rainbow";
 import Drips from "./components/Drips";
 import Spiral from "./components/Spiral";
+import Home from "./components/start/Home";
+import Pops from "./components/Pops/bubbles";
 
 function App() {
   return (

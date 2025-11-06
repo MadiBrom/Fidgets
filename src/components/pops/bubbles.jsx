@@ -123,11 +123,11 @@ const Pops = () => {
   };
 
   return (
-    <div ref={popfieldRef} className="popfield">
+    <div ref={popfieldRef} className="pops-field">
       {pops.map((pop) => (
         <div
           key={pop.id}
-          className={`pop ${pop.popped ? "popped" : ""}`}
+          className={`pops-bubble ${pop.popped ? "is-popped" : ""}`}
           style={{
             width: pop.size,
             height: pop.size,
@@ -152,7 +152,7 @@ const Pops = () => {
       {confetti.map((particle) => (
         <div
           key={particle.id}
-          className="confetti"
+          className="pops-confetti"
           style={{
             width: particle.size,
             height: particle.size,
@@ -170,7 +170,7 @@ const Pops = () => {
         />
       ))}
       <style jsx>{`
-        .popfield {
+        \.pops-field {
           position: fixed;
           top: 0;
           left: 0;
@@ -180,11 +180,11 @@ const Pops = () => {
           pointer-events: none;
         }
 
-        .pop {
+        \.pops-bubble {
           pointer-events: auto;
         }
 
-        .confetti {
+        \.pops-confetti {
           pointer-events: none;
         }
 
@@ -203,3 +203,8 @@ const Pops = () => {
 };
 
 export default Pops;
+
+
+
+
+

@@ -610,21 +610,21 @@ function Home() {
         aria-hidden="true"
       />
 
-      <header className="hero">
-        <h1 className="title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
+      <header className="home-header">
+        <h1 className="home-title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
           Interactive Fidget Playground
         </h1>
 
 
         {(() => {
           return (
-            <div className="hud" role="status" aria-live="polite">
+            <div className="home-hud" role="status" aria-live="polite">
               <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <div className="hud-left" title="Dot count">
-                  <span className="hud-star" aria-hidden="true">◯</span>
-                  <span className="hud-count" aria-label={`Dot count ${circles.length}`}>{circles.length}</span>
+                <div className="home-hud-left" title="Dot count">
+                  <span className="home-hud-star" aria-hidden="true">◯</span>
+                  <span className="home-hud-count" aria-label={`Dot count ${circles.length}`}>{circles.length}</span>
                 </div>
-                <button className="icon-btn reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
+                <button className="home-icon-btn home-reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
               </div>
               <span className="sr-only">Dot count {circles.length}</span>
             </div>
@@ -632,21 +632,21 @@ function Home() {
         })()}
       </header>
 
-      <main ref={playRef} className="play">
+      <main ref={playRef} className="home-play">
         {showReward && (
-          <div className="reward-overlay" role="dialog" aria-modal="true" onClick={() => setShowReward(false)}>
-            <div className="reward-modal" onClick={e => e.stopPropagation()}>
-              <h2 className="reward-title">Achievement unlocked</h2>
-              <p className="reward-text">Total completions: {totalCompletions}</p>
-              <div className="reward-actions">
-                <button className="btn" onClick={() => setShowReward(false)} aria-label="Dismiss reward">Dismiss</button>
-                <button className="btn" onClick={() => { setShowReward(false); resetBoard(); }} aria-label="Reset board">Reset</button>
+          <div className="home-reward-overlay" role="dialog" aria-modal="true" onClick={() => setShowReward(false)}>
+            <div className="home-reward-modal" onClick={e => e.stopPropagation()}>
+              <h2 className="home-reward-title">Achievement unlocked</h2>
+              <p className="home-reward-text">Total completions: {totalCompletions}</p>
+              <div className="home-reward-actions">
+                <button className="home-btn" onClick={() => setShowReward(false)} aria-label="Dismiss reward">Dismiss</button>
+                <button className="home-btn" onClick={() => { setShowReward(false); resetBoard(); }} aria-label="Reset board">Reset</button>
               </div>
             </div>
           </div>
         )}
         <div
-          className="circle"
+          className="home-circle"
           onPointerDown={onSpawnerPointerDown}
           style={{
             width: `${circleSize}px`,
@@ -665,7 +665,7 @@ function Home() {
         {circles.map(circle => (
           <div
             key={circle.id}
-            className="circle"
+            className="home-circle"
             onPointerDown={e => onPointerDown(e, circle.id)}
             style={{
               width: `${circle.size}px`,

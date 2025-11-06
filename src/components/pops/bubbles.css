@@ -1,4 +1,4 @@
-﻿.popfield {
+.pops-field {
   position: fixed;
   top: 0;
   left: 0;
@@ -9,7 +9,7 @@
   pointer-events: none;
 }
 
-.pop {
+.pops-bubble {
   position: absolute;
   background: rgba(173, 216, 230, 0.7);
   border-radius: 50%;
@@ -30,7 +30,7 @@
   }
 }
 
-.spin-out-fade {
+.pops-out {
   animation: spinOutFade 1s ease-in-out forwards;
 }
 
@@ -45,6 +45,6 @@
   }
 }
 
-.fade-in-spin {
+.pops-in {
   animation: fadeInSpin 1s ease-in-out forwards;
 }

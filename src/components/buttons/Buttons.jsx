@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./buttons.css";
+import "./Buttons.css";
 
 const roundedStarPath = ({ points = 5, outer = 48, inner = 26, round = 7 }) => {
   const cx = 50, cy = 50;
@@ -106,7 +106,7 @@ const Buttons = () => {
     const generated = Array.from({ length: count }, (_, i) => {
       const size = Math.floor(Math.random() * 70) + 70;
       return {
-        id: `star${i + 1}`,
+        id: `btnStar${i + 1}`,
         size,
         color: getRandomColor(),
         position: getRandomPositionForSize(size),
@@ -248,39 +248,39 @@ const Buttons = () => {
   const d = roundedStarPath({ points: 5, outer: 56, inner: 36, round: 14 });
 
   return (
-    <div className="shapes-container">
+    <div className="btn-container">
 
       {showTopTag && (
-        <div className={`top-popdown ${isManualBreak ? 'on' : 'off'}`} role="status" aria-live="polite">
+        <div className={`btn-mode-pop ${isManualBreak ? 'on' : 'off'}`} role="status" aria-live="polite">
           {topTagText}
         </div>
       )}
 
       {!paused && (
-      <div className="focus-hud">
+      <div className="btn-hud">
         <button
-          className={`pill-toggle ${isManualBreak ? 'break' : 'focus'}`}
+          className={`btn-mode-toggle ${isManualBreak ? 'break' : 'focus'}`}
           onClick={() => setFocusMode(f => !f)}
           aria-label="Toggle breaktime"
           aria-pressed={isManualBreak}
         >
-          <span className="pill-track" aria-hidden="true" />
-          <span className="pill-knob" aria-hidden="true" />
+          <span className="btn-mode-track" aria-hidden="true" />
+          <span className="btn-mode-knob" aria-hidden="true" />
         </button>
-        <div className="hud-bar">
-          <div className="hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
+        <div className="btn-hud-bar">
+          <div className="btn-hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
         </div>
-        <span className="hud-label">{`${progress}/${target}`}</span>
+        <span className="btn-hud-label">{`${progress}/${target}`}</span>
         <span className="sr-only" aria-live="polite">{showTopTag ? topTagText : ""}</span>
       </div>
       )}
-      {completed && <div className="completion-glow" aria-hidden="true" />}
+      {completed && <div className="btn-complete-glow" aria-hidden="true" />}
       {paused && (
-        <div className="breather-overlay" role="status" aria-live="polite">
-          <div className="breather-pulse" aria-hidden="true" />
-          <div className={`breather-fill ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
-          <div className={`breather-ring ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
-          <div className="breather-sub">
+        <div className="btn-breather" role="status" aria-live="polite">
+          <div className="btn-breather-pulse" aria-hidden="true" />
+          <div className={`btn-breather-fill ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
+          <div className={`btn-breather-ring ${breatherStage === 'breathing' ? breathPhase : ''}`} aria-hidden="true" />
+          <div className="btn-breather-sub">
             {breatherStage === 'intro' ? introWords[introIndex] : `${breathPhase}`}
           </div>
         </div>
@@ -288,7 +288,7 @@ const Buttons = () => {
       {showGame && stars.map(star => (
         <button
           key={`${star.id}-${star.key}`}
-          className={`shape-button ${star.phase === "out" ? "spin-out-fade" : ""} ${star.phase === "in" ? "fade-in-spin" : ""}`}
+          className={`btn-star ${star.phase === "out" ? "btn-out" : ""} ${star.phase === "in" ? "btn-in" : ""}`}
           onPointerDown={(e) => {
             e.currentTarget.style.pointerEvents = 'none';
             e.currentTarget.style.zIndex = '0';
@@ -306,14 +306,14 @@ const Buttons = () => {
           aria-label={star.id}
         >
           <span
-            className="lift-shadow"
+            className="btn-shadow"
             aria-hidden="true"
             style={{
               background: `radial-gradient(50% 60% at 50% 50%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0) 70%)`
             }}
           />
   <svg
-    className="star-shape"
+    className="btn-star-shape"
     viewBox="0 0 100 100"
     width="100%"
     height="100%"
@@ -321,7 +321,7 @@ const Buttons = () => {
   >
     <defs>
       <clipPath id={`${star.id}-clip`}>
-        <path className="spin-geo" d={d} />
+        <path className="btn-spin-geo" d={d} />
       </clipPath>
       <linearGradient id={`${star.id}-edge`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
         <stop offset="0%" stopColor="rgba(255,255,255,0.55)" />
@@ -351,9 +351,9 @@ const Buttons = () => {
         <stop offset="100%" stopColor="rgba(0,0,0,0)" />
       </radialGradient>
     </defs>
-    <path className="spin-geo" d={d} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="3" strokeLinejoin="round" pointerEvents="none"/>
+    <path className="btn-spin-geo" d={d} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="3" strokeLinejoin="round" pointerEvents="none"/>
     <path
-      className="spin-geo"
+      className="btn-spin-geo"
       d={d}
       fill="currentColor"
       fillOpacity="0.78"
