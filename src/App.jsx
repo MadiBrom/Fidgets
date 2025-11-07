@@ -14,12 +14,18 @@ import Confetti from "./components/confetti/Confetti";
 import Bubbles from "./components/Pops/bubbles";
 
 function App() {
+  const playRef = React.useRef(null);
   return (
     <div>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/slime" element={<Slime />} />
+        <Route path="/slime" element={
+<main ref={playRef} className="slime-play">
+  {/* HUD or other UI here */}
+  <Slime fieldRef={playRef} preset="toy" blobCount={18} quality={1.0} />
+</main>
+        } />       
         <Route path="/buttons" element={<Buttons />} />
         <Route path="/birds" element={<Birds />} />
         <Route path="/pops" element={<Bubbles />} />
