@@ -1,138 +1,188 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import "./slime.css";
 
 const Slime = () => {
-  const bubblefieldRef = useRef(null);
-  const bubbles = [];
+  const playRef = useRef(null);
+  const fieldRef = useRef(null);
+  const rafRef = useRef(0);
+  const dataRef = useRef({ bubbles: [], rect: { width: 0, height: 0 } });
+  const mouseRef = useRef({ x: 0, y: 0, active: false, down: false });
+  const createAllRef = useRef(null);
+  const [count, setCount] = useState(0);
+
+  const BUBBLE_COUNT = 240;
+  const HOME_K = 0.003;
+  const POINTER_K_IDLE = 0.02;
+  const POINTER_K_DOWN = 0.06;
+  const DAMPING = 0.90;
+  const JITTER = 0.002;
+  const RADIUS = 140;
+  const MIN_GAP = 110;      
 
   useEffect(() => {
-    const bubblefield = bubblefieldRef.current;
-    const bubbleCount = 300;
+    const field = fieldRef.current;
+    if (!field) return;
 
-    
-    const floatBubble = (bubble) => {
-      const moveBubble = () => {
-        
-        const deltaX = (Math.random() * 2 - 1) * 0.2;
-        const deltaY = (Math.random() * 2 - 1) * 0.2;
-
-        
-        bubble.velocityX = (bubble.velocityX || 0) * 0.99 + deltaX;
-        bubble.velocityY = (bubble.velocityY || 0) * 0.99 + deltaY;
-
-        let newX = parseFloat(bubble.style.left) + bubble.velocityX;
-        let newY = parseFloat(bubble.style.top) + bubble.velocityY;
-
-        
-        if (newX < 0) newX = window.innerWidth;
-        if (newX > window.innerWidth) newX = 0;
-        if (newY < 0) newY = window.innerHeight;
-        if (newY > window.innerHeight) newY = 0;
-
-        bubble.style.left = `${newX}px`;
-        bubble.style.top = `${newY}px`;
-
-        requestAnimationFrame(moveBubble);
-      };
-
-      moveBubble();
+    const readRect = () => {
+      const r = field.getBoundingClientRect();
+      dataRef.current.rect = { width: r.width, height: r.height, left: r.left, top: r.top };
     };
 
-    
-    const createBubble = () => {
-      const bubble = document.createElement("div");
-
-      
-      const shapeTypes = ["bubble", "square", "triangle"];
-      const shapeClass =
-        shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-      bubble.classList.add(shapeClass);
-
-      bubble.style.width = `${Math.random() * 10 + 5}px`;
-      bubble.style.height = bubble.style.width;
-      bubble.style.top = `${Math.random() * window.innerHeight}px`;
-      bubble.style.left = `${Math.random() * window.innerWidth}px`;
-
-      bubblefield.appendChild(bubble);
-      bubbles.push(bubble);
-
-      floatBubble(bubble);
-    };
-
-    
-    for (let i = 0; i < bubbleCount; i++) {
-      createBubble();
+    readRect();
+    let ro = null;
+    if ("ResizeObserver" in window) {
+      ro = new ResizeObserver(readRect);
+      ro.observe(field);
+    } else {
+      window.addEventListener("resize", readRect);
     }
 
-    
-    const handleMouseMove = (event) => {
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
+    const createAll = () => {
+      cancelAnimationFrame(rafRef.current);
+      field.innerHTML = "";
+      dataRef.current.bubbles = [];
 
-      bubbles.forEach((bubble) => {
-        const bubbleX = bubble.offsetLeft + bubble.offsetWidth / 2;
-        const bubbleY = bubble.offsetTop + bubble.offsetHeight / 2;
-        const deltaX = mouseX - bubbleX;
-        const deltaY = mouseY - bubbleY;
-        const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-        const attractionSpeed = 30; 
+      const frag = document.createDocumentFragment();
+      const { width, height } = dataRef.current.rect;
 
-        if (distance > 0) {
-          const moveX = (deltaX / distance) * attractionSpeed;
-          const moveY = (deltaY / distance) * attractionSpeed;
+      for (let i = 0; i < BUBBLE_COUNT; i++) {
+        const el = document.createElement("div");
+        el.className = "bubble";
+        const size = 5 + Math.random() * 10;
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
 
-          bubble.style.transform = `translate(${moveX}px, ${moveY}px)`;
-          bubble.classList.add("attracted");
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+
+        dataRef.current.bubbles.push({ el, x, y, vx: 0, vy: 0, size, homeX: x, homeY: y });
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        frag.appendChild(el);
+      }
+
+      field.appendChild(frag);
+      setCount(dataRef.current.bubbles.length);
+
+      let last = performance.now();
+      const tick = (t) => {
+        const dtMs = t - last;
+        const dtFrames = Math.max(0.5, Math.min(2, dtMs / 16.6667));
+        last = t;
+
+        const { width, height } = dataRef.current.rect;
+        const mr = mouseRef.current;
+
+        for (const b of dataRef.current.bubbles) {
+          let fx = 0;
+          let fy = 0;
+
+          fx += (Math.random() * 2 - 1) * JITTER;
+          fy += (Math.random() * 2 - 1) * JITTER;
+
+          fx += (b.homeX - b.x) * HOME_K;
+          fy += (b.homeY - b.y) * HOME_K;
+
+          if (mr.active) {
+            const dx = mr.x - b.x;
+            const dy = mr.y - b.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < RADIUS) {
+              const t0 = Math.max(0, Math.min(1, (dist - MIN_GAP) / Math.max(1, RADIUS - MIN_GAP)));
+              const soft = t0 * t0 * (3 - 2 * t0);
+              const k = (mr.down ? POINTER_K_DOWN : POINTER_K_IDLE) * soft;
+
+              fx += dx * k;
+              fy += dy * k;
+
+              if (dist < RADIUS && dist > MIN_GAP * 0.5) b.el.classList.add("attracted");
+              else b.el.classList.remove("attracted");
+            } else {
+              b.el.classList.remove("attracted");
+            }
+          } else {
+            b.el.classList.remove("attracted");
+          }
+
+          b.vx = (b.vx + fx * dtFrames) * Math.pow(DAMPING, dtFrames);
+          b.vy = (b.vy + fy * dtFrames) * Math.pow(DAMPING, dtFrames);
+
+          const speed = Math.hypot(b.vx, b.vy);
+          if (speed > MAX_SPEED) {
+            const s = MAX_SPEED / speed;
+            b.vx *= s;
+            b.vy *= s;
+          }
+
+          b.x += b.vx * dtFrames;
+          b.y += b.vy * dtFrames;
+
+          if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx) * 0.4; }
+          if (b.x > width - b.size) { b.x = width - b.size; b.vx = -Math.abs(b.vx) * 0.4; }
+          if (b.y < 0) { b.y = 0; b.vy = Math.abs(b.vy) * 0.4; }
+          if (b.y > height - b.size) { b.y = height - b.size; b.vy = -Math.abs(b.vy) * 0.4; }
+
+          b.el.style.transform = `translate3d(${b.x}px, ${b.y}px, 0)`;
         }
-      });
+
+        rafRef.current = requestAnimationFrame(tick);
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
     };
 
-    
-    const handleMouseClick = (event) => {
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
-      const repulsionRadius = 300;
+    createAllRef.current = createAll;
+    createAll();
 
-      bubbles.forEach((bubble) => {
-        const bubbleX = bubble.offsetLeft + bubble.offsetWidth / 2;
-        const bubbleY = bubble.offsetTop + bubble.offsetHeight / 2;
-        const deltaX = bubbleX - mouseX;
-        const deltaY = bubbleY - mouseY;
-        const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-
-        if (distance < repulsionRadius && distance > 0) {
-          const repulsionStrength =
-            (repulsionRadius - distance) / repulsionRadius;
-          const repulsionDistance = repulsionStrength * 500;
-
-          const moveX = (deltaX / distance) * repulsionDistance;
-          const moveY = (deltaY / distance) * repulsionDistance;
-
-          let newX = bubble.offsetLeft + moveX;
-          let newY = bubble.offsetTop + moveY;
-
-          if (newX < 0) newX = window.innerWidth;
-          if (newX > window.innerWidth) newX = 0;
-          if (newY < 0) newY = window.innerHeight;
-          if (newY > window.innerHeight) newY = 0;
-
-          bubble.style.left = `${newX}px`;
-          bubble.style.top = `${newY}px`;
-        }
-      });
+    const onPointerMove = (e) => {
+      const r = dataRef.current.rect;
+      mouseRef.current.x = e.clientX - r.left;
+      mouseRef.current.y = e.clientY - r.top;
+      mouseRef.current.active = true;
     };
+    const onPointerLeave = () => { mouseRef.current.active = false; };
+    const onPointerDown = () => { mouseRef.current.down = true; mouseRef.current.active = true; };
+    const onPointerUp = () => { mouseRef.current.down = false; };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("click", handleMouseClick);
+    field.addEventListener("pointermove", onPointerMove);
+    field.addEventListener("pointerleave", onPointerLeave);
+    field.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointerup", onPointerUp);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("click", handleMouseClick);
-      bubbles.forEach((bubble) => bubble.remove());
+      if (ro) ro.disconnect(); else window.removeEventListener("resize", readRect);
+      cancelAnimationFrame(rafRef.current);
+      dataRef.current.bubbles = [];
+      field.removeEventListener("pointermove", onPointerMove);
+      field.removeEventListener("pointerleave", onPointerLeave);
+      field.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerup", onPointerUp);
     };
   }, []);
 
+  const reset = () => {
+    if (createAllRef.current) createAllRef.current();
+  };
+
   return (
-    <div ref={bubblefieldRef} className="bubblefield">
+    <div className="slime">
+      <header className="slime-header">
+        <h1 className="slime-title">Floating Glass Field</h1>
+      </header>
+
+      <main ref={playRef} className="slime-play">
+        <div className="slime-hud" role="status" aria-live="polite">
+          <div className="slime-hud-left" title="Bubble count">
+            <span className="slime-hud-star" aria-hidden="true">●</span>
+            <span className="slime-hud-count" aria-label={`Bubble count ${count}`}>{count}</span>
+          </div>
+          <button className="slime-icon-btn slime-reset-btn" onClick={reset} aria-label="Reset field">
+            <span aria-hidden="true">↺</span>
+          </button>
+        </div>
+
+        <div ref={fieldRef} className="slime-field" aria-hidden="false" />
+      </main>
     </div>
   );
 };

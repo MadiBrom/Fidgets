@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Slime from "./components/Slime";
+import Slime from "./components/slime/Slime";
 import Navbar from "./navbar/Navbar";
 import Buttons from "./components/buttons/Buttons";
 import Birds from "./components/Birds";
