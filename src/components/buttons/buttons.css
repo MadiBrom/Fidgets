@@ -10,36 +10,58 @@
 
 .btn-container {
   position: relative;
-  width: 100vw;
-  height: 100dvh; 
+  width: 100%;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr; /* compact header above play */
+  row-gap: 2px; /* tracker sits 2px above play */
   overflow: hidden;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: var(--fixed-top-clearance, 44px) 5px 5px; /* clear navbar */
   background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
 }
 
-.btn-hud { position: absolute; left: 50%; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+/* Inner playing field similar to Confetti */
+.btn-play {
+  position: relative;
+  min-height: 0;
+  height: 100%;
+  margin: 0;
+  max-width: none;
+  padding: 5px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid var(--ring);
+  box-shadow: 0 12px 40px var(--shadow);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.btn-hud { position: static; margin: 0 auto;
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px;
   background: color-mix(in oklab, var(--surface), transparent 35%);
   font: 600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; color: var(--text);
   border: 1px solid var(--ring); border-radius: 999px; box-shadow: 0 6px 18px var(--shadow);
-  max-width: min(92vw, 620px);
+  max-width: min(92vw, 520px);
 }
-.btn-hud { z-index: 40; }
+.btn-hud { z-index: 1; }
 .menu-overlay ~ .btn-hud, body.menu-open .btn-hud { opacity: 0; pointer-events: none; }
 .btn-hud .btn-hud-label { opacity: 0.85; letter-spacing: 0.3px; }
-.btn-hud .btn-hud-bar { width: min(72vw, 560px); height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
+.btn-hud .btn-hud-bar { width: min(56vw, 420px); height: 6px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
 .btn-hud .btn-hud-bar-fill { height:100%; background: linear-gradient(90deg,#00E5FF,#6C3BFF,#FF00FF); transition: width .25s ease; }
 
 
-.btn-mode-toggle { position: relative; width: 76px; height: 36px; border-radius: 999px; border: 1px solid var(--ring);
+.btn-mode-toggle { position: relative; width: 68px; height: 32px; border-radius: 999px; border: 1px solid var(--ring);
   background: transparent; padding: 0; cursor: pointer; outline: none; display: inline-flex; align-items: center; justify-content: flex-start; }
 .btn-mode-toggle .btn-mode-track { position: absolute; inset: 0; border-radius: inherit; background: color-mix(in oklab, var(--surface), transparent 10%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); transition: background .2s ease, box-shadow .2s ease; }
 .btn-mode-toggle.focus .btn-mode-track { background: linear-gradient(90deg,#00E5FF,#6C3BFF,#FF00FF); opacity: .85; }
 .btn-mode-toggle.break .btn-mode-track { background: linear-gradient(90deg,#24242c,#1a1a22); opacity: .95; }
-.btn-mode-toggle .btn-mode-knob { position: absolute; top: 50%; left: 4px; width: 28px; height: 28px; transform: translateY(-50%);
+.btn-mode-toggle .btn-mode-knob { position: absolute; top: 50%; left: 4px; width: 24px; height: 24px; transform: translateY(-50%);
   border-radius: 50%; background: #fff; box-shadow: inset 0 2px 6px rgba(0,0,0,.15), 0 4px 10px rgba(0,0,0,.25);
   transition: left .18s cubic-bezier(.2,.8,.2,1), box-shadow .15s ease; }
-.btn-mode-toggle.break .btn-mode-knob { left: calc(100% - 32px); }
+.btn-mode-toggle.break .btn-mode-knob { left: calc(100% - 28px); }
 .btn-mode-toggle:hover .btn-mode-knob { box-shadow: inset 0 2px 6px rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.35); }
 
 
@@ -61,11 +83,20 @@
   overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 
-@media (max-width: 640px){ .btn-hud { top: 64px; left: 50%; right: auto; transform: translateX(-50%); } }
-@media (min-width: 641px){ .btn-hud { top: 16px; } }
+@media (max-width: 640px){ .btn-hud { } }
+@media (min-width: 641px){ .btn-hud { } }
+
+/* Header row to hold the tracker */
+.btn-header {
+  display: grid;
+  place-items: center;
+  /* 2px gap above play, no extra top padding */
+  margin: 0;
+  margin-bottom: 2px;
+}
 
 @media (max-width: 480px){
-  .btn-hud { gap: 6px; padding: 4px 8px; left: 50%; right: auto; transform: translateX(-50%); top: calc(12px + env(safe-area-inset-top, 0px) + 44px); }
+  .btn-hud { gap: 6px; padding: 4px 8px; }
   .btn-mode-toggle { width: 60px; height: 28px; }
   .btn-mode-toggle .btn-mode-knob { width: 22px; height: 22px; left: 3px; }
   .btn-mode-toggle.break .btn-mode-knob { left: calc(100% - 25px); }
@@ -197,12 +228,12 @@
 
 
 .btn-breather {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: grid;
   place-items: center;
   background: rgba(0,0,0,0.45);
-  z-index: 4;
+  z-index: 900; /* below navbar (1000), above app */
 }
 .btn-breather .btn-breather-pulse {
   position: absolute;

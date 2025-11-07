@@ -192,3 +192,21 @@
 
 
 
+/* Global theme variables for light/dark */
+:root {
+  --bg: #f7f7f7;
+  --text: #1c1c1c;
+  --muted: #555555;
+  --ring: rgba(0,0,0,0.18);
+  /* Reserve space for fixed top-right UI (theme toggle + home) */
+  --fixed-top-clearance: calc(44px + env(safe-area-inset-top, 0px));
+  /* Slightly smaller reserved width since controls are tighter */
+  --fixed-right-gutter: calc(100px + env(safe-area-inset-right, 0px));
+}
+html.dark {
+  --bg: #030907;
+  --text: #e8e8e8;
+  --muted: #a8a8a8;
+  --ring: rgba(255,255,255,0.18);
+}
+html, body { background: var(--bg); color: var(--text); }

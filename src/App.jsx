@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Slime from "./components/Slime";
 import Navbar from "./navbar/Navbar";
@@ -10,7 +10,8 @@ import Rainbow from "./components/Rainbow";
 import Drips from "./components/Drips";
 import Spiral from "./components/Spiral";
 import Home from "./components/start/Home";
-import Pops from "./components/Pops/bubbles";
+import Pops from "./components/pops/bubbles";
+import Confetti from "./components/confetti/Confetti";
 
 function App() {
   return (
@@ -27,9 +28,11 @@ function App() {
         <Route path="/rainbow" element={<Rainbow />} />
         <Route path="/drips" element={<Drips />} />
         <Route path="/spiral" element={<Spiral />} />
+        <Route path="/confetti" element={<Confetti />} />
       </Routes>
     </div>
   );
 }
 
 export default App;
+

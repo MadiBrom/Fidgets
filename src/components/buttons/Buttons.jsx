@@ -50,22 +50,36 @@ const COLORS = [
 ];
 
 const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
-const SAFE_TOP = () => (window.innerWidth <= 640 ? 96 : 56);
-const EDGE_PAD = 8;
-const getRandomPosition = () => ({
-  top: Math.max(SAFE_TOP(), Math.random() * (window.innerHeight - 100 - SAFE_TOP())),
-  left: Math.max(EDGE_PAD, Math.random() * (window.innerWidth - 100 - EDGE_PAD)),
-});
-const getRandomPositionForSize = (size) => {
-  const safeTop = SAFE_TOP();
-  const maxTop = Math.max(safeTop, window.innerHeight - size - EDGE_PAD);
-  const maxLeft = Math.max(EDGE_PAD, window.innerWidth - size - EDGE_PAD);
-  const top = safeTop + Math.random() * Math.max(0, maxTop - safeTop);
+const EDGE_PAD = 5;
+const clamp = (min, v, max) => Math.max(min, Math.min(v, max));
+
+// Reads the current playable area (btn-play) rect
+const readPlayRect = (el) => {
+  if (!el) return { width: window.innerWidth, height: window.innerHeight, left: 0, top: 0 };
+  const r = el.getBoundingClientRect();
+  return { width: r.width, height: r.height, left: r.left, top: r.top };
+};
+
+const getRandomPositionForSize = (size, playEl) => {
+  const rect = readPlayRect(playEl);
+  const maxTop = Math.max(EDGE_PAD, rect.height - size - EDGE_PAD);
+  const maxLeft = Math.max(EDGE_PAD, rect.width - size - EDGE_PAD);
+  const top = EDGE_PAD + Math.random() * Math.max(0, maxTop - EDGE_PAD);
   const left = EDGE_PAD + Math.random() * Math.max(0, maxLeft - EDGE_PAD);
   return { top, left };
 };
 
+// Derive a scale factor from the play area size.
+// Baseline is roughly 1200x700; clamp for sane bounds.
+const getScaleForRect = (rect) => {
+  const w = Math.max(320, rect.width || window.innerWidth);
+  const h = Math.max(360, rect.height || window.innerHeight);
+  const s = Math.min(w / 1200, h / 700);
+  return Math.max(0.7, Math.min(1.4, s));
+};
+
 const Buttons = () => {
+  const playRef = useRef(null);
   const [stars, setStars] = useState([]);
   const timersRef = useRef(new Map()); 
   const [focusMode, setFocusMode] = useState(true);
@@ -102,19 +116,48 @@ const Buttons = () => {
     else if (vw < 768) count = 26;
     else if (vw < 1200) count = 32;
     else count = 40;
+    const init = () => {
+      const rect = readPlayRect(playRef.current);
+      const scale = getScaleForRect(rect);
+      const generated = Array.from({ length: count }, (_, i) => {
+        const baseSize = Math.floor(Math.random() * 70) + 70; // 70-140 baseline
+        const size = Math.round(baseSize * scale);
+        return {
+          id: `btnStar${i + 1}`,
+          baseSize,
+          size,
+          color: getRandomColor(),
+          position: getRandomPositionForSize(size, playRef.current),
+          phase: "idle",
+          key: 0,
+        };
+      });
+      setStars(generated);
+    };
 
-    const generated = Array.from({ length: count }, (_, i) => {
-      const size = Math.floor(Math.random() * 70) + 70;
-      return {
-        id: `btnStar${i + 1}`,
-        size,
-        color: getRandomColor(),
-        position: getRandomPositionForSize(size),
-        phase: "idle",
-        key: 0,
-      };
-    });
-    setStars(generated);
+    // wait a frame for layout to stabilize so playRef has size
+    requestAnimationFrame(init);
+  }, []);
+
+  // Resize-responsive: rescale stars and clamp positions to the play area
+  useEffect(() => {
+    const onResize = () => {
+      const rect = readPlayRect(playRef.current);
+      const scale = getScaleForRect(rect);
+      setStars(prev => prev.map(s => {
+        const size = Math.round((s.baseSize || s.size) * scale);
+        return {
+          ...s,
+          size,
+          position: {
+            top: clamp(EDGE_PAD, s.position.top, Math.max(EDGE_PAD, rect.height - size - EDGE_PAD)),
+            left: clamp(EDGE_PAD, s.position.left, Math.max(EDGE_PAD, rect.width - size - EDGE_PAD)),
+          }
+        };
+      }));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const isManualBreak = !focusMode;
@@ -216,7 +259,8 @@ const Buttons = () => {
     const toIn = setTimeout(() => {
       setStars(prev => prev.map(s => s.id === id ? {
         ...s,
-        position: getRandomPositionForSize(s.size),
+        // Constrain respawn to the playing field bounds
+        position: getRandomPositionForSize(s.size, playRef.current),
         phase: "in",
         key: s.key + 1,
       } : s));
@@ -256,24 +300,26 @@ const Buttons = () => {
         </div>
       )}
 
-      {!paused && (
-      <div className="btn-hud">
-        <button
-          className={`btn-mode-toggle ${isManualBreak ? 'break' : 'focus'}`}
-          onClick={() => setFocusMode(f => !f)}
-          aria-label="Toggle breaktime"
-          aria-pressed={isManualBreak}
-        >
-          <span className="btn-mode-track" aria-hidden="true" />
-          <span className="btn-mode-knob" aria-hidden="true" />
-        </button>
-        <div className="btn-hud-bar">
-          <div className="btn-hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
-        </div>
-        <span className="btn-hud-label">{`${progress}/${target}`}</span>
-        <span className="sr-only" aria-live="polite">{showTopTag ? topTagText : ""}</span>
-      </div>
-      )}
+      <header className="btn-header">
+        {!paused && (
+          <div className="btn-hud">
+            <button
+              className={`btn-mode-toggle ${isManualBreak ? 'break' : 'focus'}`}
+              onClick={() => setFocusMode(f => !f)}
+              aria-label="Toggle breaktime"
+              aria-pressed={isManualBreak}
+            >
+              <span className="btn-mode-track" aria-hidden="true" />
+              <span className="btn-mode-knob" aria-hidden="true" />
+            </button>
+            <div className="btn-hud-bar">
+              <div className="btn-hud-bar-fill" style={{ width: `${Math.min(100, (progress / target) * 100)}%` }} />
+            </div>
+            <span className="btn-hud-label">{`${progress}/${target}`}</span>
+            <span className="sr-only" aria-live="polite">{showTopTag ? topTagText : ""}</span>
+          </div>
+        )}
+      </header>
       {completed && <div className="btn-complete-glow" aria-hidden="true" />}
       {paused && (
         <div className="btn-breather" role="status" aria-live="polite">
@@ -285,6 +331,7 @@ const Buttons = () => {
           </div>
         </div>
       )}
+      <main ref={playRef} className="btn-play">
       {showGame && stars.map(star => (
         <button
           key={`${star.id}-${star.key}`}
@@ -365,8 +412,9 @@ const Buttons = () => {
     <rect width="100" height="100" fill={`url(#${star.id}-rim)`}   clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "screen", opacity: 0.5 }} pointerEvents="none" />
     <rect width="100" height="100" fill={`url(#${star.id}-shade)`} clipPath={`url(#${star.id}-clip)`} style={{ mixBlendMode: "multiply", opacity: 0.6 }} pointerEvents="none" />
   </svg>
-</button>
+        </button>
       ))}
+      </main>
     </div>
   );
 };
