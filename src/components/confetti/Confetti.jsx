@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import "./confetti.css";
 
@@ -583,7 +583,7 @@ function Confetti() {
   };
 
   return (
-    <div className="home">
+    <div className="confetti">
       <canvas
         ref={canvasRef}
         style={{
@@ -610,43 +610,40 @@ function Confetti() {
         aria-hidden="true"
       />
 
-      <header className="home-header">
-        <h1 className="home-title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
+      <header className="confetti-header">
+        <h1 className="confetti-title" style={{ "--gx": `${gradientPosition.x}%`, "--gy": `${gradientPosition.y}%` }}>
           Interactive Fidget Playground
         </h1>
 
 
-        {(() => {
-          return (
-            <div className="home-hud" role="status" aria-live="polite">
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                <div className="home-hud-left" title="Dot count">
-                  <span className="home-hud-star" aria-hidden="true">◯</span>
-                  <span className="home-hud-count" aria-label={`Dot count ${circles.length}`}>{circles.length}</span>
-                </div>
-                <button className="home-icon-btn home-reset-btn" onClick={resetBoard} aria-label="Reset board">↺</button>
-              </div>
-              <span className="sr-only">Dot count {circles.length}</span>
-            </div>
-          );
-        })()}
+        {(() => null)()}
       </header>
 
-      <main ref={playRef} className="home-play">
+      <main ref={playRef} className="confetti-play">
+        <div className="confetti-hud" role="status" aria-live="polite">
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+            <div className="confetti-hud-left" title="Dot count">
+              <span className="confetti-hud-star" aria-hidden="true">●</span>
+              <span className="confetti-hud-count" aria-label={`Dot count ${circles.length}`}>{circles.length}</span>
+            </div>
+            <button className="confetti-icon-btn confetti-reset-btn" onClick={resetBoard} aria-label="Reset board"><span aria-hidden="true">↺</span></button>
+          </div>
+          <span className="sr-only">Dot count {circles.length}</span>
+        </div>
         {showReward && (
-          <div className="home-reward-overlay" role="dialog" aria-modal="true" onClick={() => setShowReward(false)}>
-            <div className="home-reward-modal" onClick={e => e.stopPropagation()}>
-              <h2 className="home-reward-title">Achievement unlocked</h2>
-              <p className="home-reward-text">Total completions: {totalCompletions}</p>
-              <div className="home-reward-actions">
-                <button className="home-btn" onClick={() => setShowReward(false)} aria-label="Dismiss reward">Dismiss</button>
-                <button className="home-btn" onClick={() => { setShowReward(false); resetBoard(); }} aria-label="Reset board">Reset</button>
+          <div className="confetti-reward-overlay" role="dialog" aria-modal="true" onClick={() => setShowReward(false)}>
+            <div className="confetti-reward-modal" onClick={e => e.stopPropagation()}>
+              <h2 className="confetti-reward-title">Achievement unlocked</h2>
+              <p className="confetti-reward-text">Total completions: {totalCompletions}</p>
+              <div className="confetti-reward-actions">
+                <button className="confetti-btn" onClick={() => setShowReward(false)} aria-label="Dismiss reward">Dismiss</button>
+                <button className="confetti-btn" onClick={() => { setShowReward(false); resetBoard(); }} aria-label="Reset board">Reset</button>
               </div>
             </div>
           </div>
         )}
         <div
-          className="home-circle"
+          className="confetti-circle"
           onPointerDown={onSpawnerPointerDown}
           style={{
             width: `${circleSize}px`,
@@ -665,7 +662,7 @@ function Confetti() {
         {circles.map(circle => (
           <div
             key={circle.id}
-            className="home-circle"
+            className="confetti-circle"
             onPointerDown={e => onPointerDown(e, circle.id)}
             style={{
               width: `${circle.size}px`,
@@ -684,3 +681,4 @@ function Confetti() {
 }
 
 export default Confetti;
+
