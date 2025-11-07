@@ -28,36 +28,74 @@ const Pops = () => {
     return ctx;
   };
 
-  const playPop = async (size = 60) => {
+  const playPop = async () => {
     const ctx = await ensureAudio();
     if (!ctx) return;
-    const duration = 0.09 + Math.random() * 0.02;
-    const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 1.4);
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = "highpass";
-    filter.frequency.value = 800 + Math.random() * 900;
-    const gain = ctx.createGain();
     const now = ctx.currentTime;
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.6, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    src.start(now);
-    src.stop(now + duration + 0.01);
+
+    const noiseDur = 0.035 + Math.random() * 0.015;
+    const noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * noiseDur), ctx.sampleRate);
+    const n = noise.getChannelData(0);
+    for (let i = 0; i < n.length; i++) n[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n.length, 1.25);
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noise;
+
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 1600 + Math.random() * 1400;
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 2600 + Math.random() * 1200;
+    bp.Q.value = 1.2;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(1.0, now + 0.002);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + noiseDur);
+
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    const f0 = 2200 + Math.random() * 800;
+    osc.frequency.setValueAtTime(f0, now);
+    osc.frequency.exponentialRampToValueAtTime(900 + Math.random() * 200, now + 0.018);
+
+    const clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.0001, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.75, now + 0.001);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.022);
+
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.setValueAtTime(-16, now);
+    comp.knee.setValueAtTime(18, now);
+    comp.ratio.setValueAtTime(6, now);
+    comp.attack.setValueAtTime(0.002, now);
+    comp.release.setValueAtTime(0.06, now);
+
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.9, now);
+
+    noiseSrc.connect(hp);
+    hp.connect(bp);
+    bp.connect(noiseGain);
+    noiseGain.connect(master);
+
+    osc.connect(clickGain);
+    clickGain.connect(master);
+
+    master.connect(comp);
+    comp.connect(ctx.destination);
+
+    noiseSrc.start(now);
+    noiseSrc.stop(now + noiseDur + 0.01);
+    osc.start(now);
+    osc.stop(now + 0.024);
   };
 
   const rippleAt = (x, y, size = 60) => {
     const id = Math.random().toString(36).slice(2, 11);
-    setRipples(prev => [...prev, { id, x, y, size }]);
-    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 300);
+    setRipples(prev => [...prev, { id, x, y, size: size * 1.15 }]);
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 220);
   };
 
   const createPop = (offScreen = false) => {
@@ -115,16 +153,17 @@ const Pops = () => {
   }, []);
 
   const burstAt = (x, y, size = 60) => {
-    const count = 18;
+    const count = Math.round(18 + size * 0.14);
+    const speedBase = 240 + Math.random() * 180 + size * 1.4;
     const born = Array.from({ length: count }, () => {
       const id = Math.random().toString(36).slice(2, 11);
       const angle = Math.random() * Math.PI * 2;
-      const speed = 140 + Math.random() * 120;
+      const speed = speedBase * (0.82 + Math.random() * 0.36);
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
       const psize = 2 + Math.random() * 3.5;
       const tint = Math.floor(180 + Math.random() * 80);
-      const color = `hsla(${tint}, 90%, 85%, 0.9)`;
+      const color = `hsla(${tint}, 90%, 85%, 0.95)`;
       return {
         id,
         x: x - psize / 2,
@@ -134,10 +173,10 @@ const Pops = () => {
         size: psize,
         color,
         age: 0,
-        life: 0.95 + Math.random() * 0.55,
-        drag: 1.2 + Math.random() * 0.6,
+        life: 0.20 + Math.random() * 0.18,
+        drag: 2.1 + Math.random() * 0.8,
         phase: Math.random() * Math.PI * 2,
-        freq: 6 + Math.random() * 4,
+        freq: 8 + Math.random() * 5,
         opacity: 1
       };
     });
@@ -157,19 +196,20 @@ const Pops = () => {
         const p = arr[i];
         p.age += dt;
         const u = Math.min(1, p.age / p.life);
-        const g = lerp(-30, 380, easeOutCubic(u));
+        const g = -120 + 90 * easeOutCubic(u);
         p.vx *= Math.exp(-p.drag * dt);
         p.vy *= Math.exp(-p.drag * dt);
-        const swirl = 28 * Math.sin(p.freq * p.age + p.phase);
-        const breeze = 12;
+        const swirl = 26 * Math.sin(p.freq * p.age + p.phase);
+        const breeze = 10;
         p.vx += (swirl + breeze) * dt;
         p.vy += g * dt;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        p.opacity = 1 - easeInCubic(Math.max(0, (p.age - p.life * 0.7) / (p.life * 0.3)));
-        if (p.age >= p.life || p.opacity <= 0) {
-          arr.splice(i, 1);
-        }
+        const s = 0.9 + 0.3 * (1 - u);
+        const fadeU = Math.max(0, (u - 0.3) / 0.7);
+        p.opacity = 1 - easeInCubic(fadeU);
+        p.scale = s;
+        if (p.age >= p.life || p.opacity <= 0.03) arr.splice(i, 1);
       }
 
       if (mountedRef.current) setConfetti([...arr]);
@@ -214,12 +254,12 @@ const Pops = () => {
             setPops(prev => prev.map(p => (p.id === pop.id ? { ...p, popped: true } : p)));
             rippleAt(cx, cy, pop.size);
             burstAt(cx, cy, pop.size);
-            playPop(pop.size);
+            playPop();
             if (navigator.vibrate) { try { navigator.vibrate(8); } catch {} }
             setTimeout(() => {
               setPops(prev => prev.filter(p => p.id !== pop.id));
               createPop(true);
-            }, 500);
+            }, 420);
           }}
         >
           <span className="highlight" />
@@ -237,7 +277,7 @@ const Pops = () => {
             left: r.x - r.size / 2,
             top: r.y - r.size / 2,
             ["--rsize"]: `${Math.round(r.size)}px`,
-            animation: `ripple 260ms ease-out forwards`
+            animation: `ripple 200ms ease-out forwards`
           }}
         />
       ))}
@@ -255,6 +295,7 @@ const Pops = () => {
             borderRadius: "50%",
             backgroundColor: p.color,
             opacity: p.opacity,
+            transform: `translateZ(0) scale(${p.scale ?? 1})`,
             pointerEvents: "none",
             filter: "saturate(1.05) blur(0.2px)",
             boxShadow: "0 0 10px rgba(180, 220, 255, 0.35)"
@@ -339,7 +380,7 @@ const Pops = () => {
           pointer-events: none;
         }
         .pops-bubble.is-popped {
-          animation: pop-burst 160ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+          animation: pop-burst 110ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
           transition: none !important;
           pointer-events: none;
           box-shadow: none;
@@ -347,9 +388,7 @@ const Pops = () => {
         .pops-bubble.is-popped::before,
         .pops-bubble.is-popped::after,
         .pops-bubble.is-popped .highlight { display: none; }
-        .pops-confetti {
-          pointer-events: none;
-        }
+        .pops-confetti { pointer-events: none; }
         .pops-ripple {
           position: absolute;
           border-radius: 50%;
@@ -358,24 +397,10 @@ const Pops = () => {
           pointer-events: none;
           mix-blend-mode: screen;
         }
-        @keyframes film-rotate {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes floaty {
-          0%, 100% { transform: translateZ(0) translateY(0); }
-          50%      { transform: translateZ(0) translateY(-2px); }
-        }
-        @keyframes pop-burst {
-          0%   { transform: translateZ(0) scale(1);    opacity: 1; }
-          12%  { transform: translateZ(0) scale(1.06); opacity: 0.98; }
-          38%  { transform: translateZ(0) scale(0.82); opacity: 0.85; }
-          100% { transform: translateZ(0) scale(0);    opacity: 0; }
-        }
-        @keyframes ripple {
-          0%   { transform: translateZ(0) scale(0.6); opacity: 0.65; }
-          100% { transform: translateZ(0) scale(1.6); opacity: 0; }
-        }
+        @keyframes film-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes floaty { 0%, 100% { transform: translateZ(0) translateY(0); } 50% { transform: translateZ(0) translateY(-2px); } }
+        @keyframes pop-burst { 0% { transform: translateZ(0) scale(1); opacity: 1; } 12% { transform: translateZ(0) scale(1.06); opacity: 0.98; } 38% { transform: translateZ(0) scale(0.82); opacity: 0.85; } 100% { transform: translateZ(0) scale(0); opacity: 0; } }
+        @keyframes ripple { 0% { transform: translateZ(0) scale(0.6); opacity: 0.65; } 100% { transform: translateZ(0) scale(1.6); opacity: 0; } }
       `}</style>
     </div>
   );
