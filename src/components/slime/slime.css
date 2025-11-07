@@ -1,0 +1,95 @@
+:root {
+  --bg: #0b0b0b;
+  --surface: #141414;
+  --text: #e8e8e8;
+  --muted: #a8a8a8;
+  --ring: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.5);
+  --radius: 16px;
+}
+
+.slime {
+  min-height: 100dvh;
+  max-height: 100dvh;
+  background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
+  color: var(--text);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.slime-header {
+  padding: clamp(12px, 2.5vw, 24px);
+  padding-top: calc(clamp(12px, 2.5vw, 24px) + var(--fixed-top-clearance, 44px));
+  margin: 0 0 2px 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.slime-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.05;
+  font-size: clamp(1.4rem, 4.5vw, 3rem);
+  color: transparent;
+  background-image: linear-gradient(90deg, #00B3FF, #FF00C3, #d9ff00, #00ff88ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-size: 200% 200%;
+  background-position: 50% 50%;
+}
+
+.slime-play {
+  position: relative;
+  height: 100%;
+  margin: 0 clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--ring);
+  box-shadow: 0 12px 40px var(--shadow);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.slime-hud {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  right: 2px;
+  z-index: 20;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.slime-hud-left { display:inline-flex; align-items:center; gap:6px; padding:3px 8px; border-radius:10px; background: transparent; border: 0; }
+.slime-hud-star{ color:#FFD400; text-shadow: 0 0 6px rgba(255,212,0,0.5); }
+.slime-hud-count{ font: 800 0.85rem/1 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; }
+.slime-icon-btn{ width:28px; height:28px; display:grid; place-items:center; border-radius:10px; padding:0; background: transparent; border: 0; color: var(--text); }
+.slime-reset-btn span{ font-size:16px; }
+
+.slime-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: auto;           
+  touch-action: none;             
+  -webkit-backdrop-filter: saturate(140%) blur(2px);
+  backdrop-filter: saturate(140%) blur(2px);
+}
+
+.slime-field .bubble {
+  position: absolute;
+  left: 0; top: 0;
+  border-radius: 50%;
+  pointer-events: none;           
+  background:
+    radial-gradient(35% 35% at 30% 30%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0.0) 100%),
+    radial-gradient(75% 75% at 50% 50%, rgba(173,216,230,0.45) 0%, rgba(173,216,230,0.15) 60%, rgba(173,216,230,0.08) 100%);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 8px rgba(173,216,230,0.35), inset 0 0 6px rgba(255,255,255,0.2);
+  will-change: transform;
+}
+
+.slime-field .bubble.attracted { transform: scale(1.15); }
