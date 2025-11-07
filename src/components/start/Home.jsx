@@ -6,7 +6,7 @@ import "./Home.css";
 const Home = () => {
   return (
     <main className="home-page">
-      <h1 className="home-title">The Digital Respite 🍵🍃</h1>
+      <h1 className="home-title">Digital Respite 🍵🍃</h1>
       <section className="home-grid" aria-label="Game picks">
         {FIDGETS.map((t) => (
           <Link key={t.path} to={t.path} className="home-tile" aria-label={t.title}>
