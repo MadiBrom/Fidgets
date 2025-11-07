@@ -10,8 +10,8 @@ import Rainbow from "./components/Rainbow";
 import Drips from "./components/Drips";
 import Spiral from "./components/Spiral";
 import Home from "./components/start/Home";
-import Pops from "./components/pops/bubbles";
 import Confetti from "./components/confetti/Confetti";
+import Bubbles from "./components/Pops/bubbles";
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
         <Route path="/slime" element={<Slime />} />
         <Route path="/buttons" element={<Buttons />} />
         <Route path="/birds" element={<Birds />} />
-        <Route path="/pops" element={<Pops />} />
+        <Route path="/pops" element={<Bubbles />} />
         <Route path="/lines" element={<Lines />} />
         <Route path="/ocean" element={<Ocean />} />
         <Route path="/rainbow" element={<Rainbow />} />

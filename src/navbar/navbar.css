@@ -159,7 +159,6 @@
 .menu-heading { color: var(--muted, #a8a8a8); font: 700 0.8rem/1.2 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; padding: 8px 6px 4px; letter-spacing: 0.4px; text-transform: uppercase; }
 .menu-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; border-radius: 1px; }
 
-/* Minimal fixed Home text link */
 .home-fixed {
   position: fixed;
   top: calc(12px + env(safe-area-inset-top, 0px));
@@ -170,7 +169,7 @@
   display: grid;
   place-items: center;
   border: 0;
-  background: transparent; /* no circular background */
+  background: transparent;
   color: var(--text, #e8e8e8);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -179,11 +178,9 @@
 
 .home-fixed:focus-visible { outline: 2px solid rgba(255,255,255,0.35); outline-offset: 2px; border-radius: 3px; }
 
-/* Theme toggle pill (sun/moon) */
 .theme-toggle {
   position: fixed;
   top: calc(12px + env(safe-area-inset-top, 0px));
-  /* sit just to the left of the home button with a tight gap */
   right: calc(42px + env(safe-area-inset-right, 0px));
   z-index: 1000;
   pointer-events: auto;
@@ -231,7 +228,6 @@
   transition: transform 180ms ease, background 180ms ease;
 }
 
-/* Dark state shifts the thumb to the right */
 .theme-toggle-btn.is-dark .toggle-thumb { transform: translate(20px, -50%); background: #00F5FF; }
 .theme-toggle-btn.is-dark .icon.sun { opacity: 0.4; }
 .theme-toggle-btn:not(.is-dark) .icon.moon { opacity: 0.4; }
