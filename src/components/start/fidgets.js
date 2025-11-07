@@ -9,6 +9,5 @@ export const FIDGETS = [
   { path: "/rainbow", title: "Rainbow", emoji: "🌈", bg: "linear-gradient(135deg,#fda4af,#fde68a)" },
   { path: "/drips", title: "Drips", emoji: "💧", bg: "linear-gradient(135deg,#e5e7eb,#cbd5e1)" },
   { path: "/spiral", title: "Spiral", emoji: "🌀", bg: "linear-gradient(135deg,#fcd34d,#fdba74)" },
-  { path: "/confetti", title: "Confetti", emoji: "🎉", bg: "linear-gradient(135deg,#fcd34d,#fdba74)" }
 ];
 
