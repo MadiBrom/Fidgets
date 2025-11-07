@@ -1,3 +1,5 @@
+/* slime.css */
+/* root vars */
 :root {
   --bg: #0b0b0b;
   --surface: #141414;
@@ -8,27 +10,22 @@
   --radius: 16px;
 }
 
-.slime {
-  min-height: 100dvh;
-  max-height: 100dvh;
-  background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
-  color: var(--text);
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-}
+/* remove outer gutters and make app full bleed */
+html, body, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); }
+.slime { width: 100vw; min-height: 100dvh; max-height: 100dvh; color: var(--text); display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
 
+/* header */
 .slime-header {
-  padding: clamp(12px, 2.5vw, 24px);
+  padding: clamp(12px, 2.5vw, 24px) 0 2px; /* no left or right padding */
   padding-top: calc(clamp(12px, 2.5vw, 24px) + var(--fixed-top-clearance, 44px));
-  margin: 0 0 2px 0;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   position: relative;
   z-index: 10;
+  /* Ensure nothing from the playfield shows behind the title */
+  background: var(--bg);
 }
-
 .slime-title {
   margin: 0;
   font-weight: 700;
@@ -42,18 +39,16 @@
   background-position: 50% 50%;
 }
 
+/* playing field */
 .slime-play {
   position: relative;
   height: 100%;
-  margin: 0 clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-  border: 1px solid var(--ring);
-  box-shadow: 0 12px 40px var(--shadow);
+  margin: 0; /* no side margins */
   overflow: hidden;
   box-sizing: border-box;
 }
 
+/* HUD */
 .slime-hud {
   position: absolute;
   bottom: calc(100% + 2px);
@@ -69,27 +64,49 @@
 .slime-icon-btn{ width:28px; height:28px; display:grid; place-items:center; border-radius:10px; padding:0; background: transparent; border: 0; color: var(--text); }
 .slime-reset-btn span{ font-size:16px; }
 
+/* field layers */
 .slime-field {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  pointer-events: auto;           
-  touch-action: none;             
+  pointer-events: auto;
+  touch-action: none;
   -webkit-backdrop-filter: saturate(140%) blur(2px);
   backdrop-filter: saturate(140%) blur(2px);
+  /* Make this the sole visible playing field */
+  border-radius: var(--radius);
+  border: 1px solid var(--ring);
+  box-shadow: 0 12px 40px var(--shadow);
 }
 
+/* background svg sits under pressure and bubbles */
+.slime-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* pressure canvas */
+.slime-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* bubbles on top */
 .slime-field .bubble {
   position: absolute;
   left: 0; top: 0;
   border-radius: 50%;
-  pointer-events: none;           
+  pointer-events: none;
   background:
-    radial-gradient(35% 35% at 30% 30%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0.0) 100%),
+    radial-gradient(35% 35% at 30% 30%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%),
     radial-gradient(75% 75% at 50% 50%, rgba(173,216,230,0.45) 0%, rgba(173,216,230,0.15) 60%, rgba(173,216,230,0.08) 100%);
   border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 0 8px rgba(173,216,230,0.35), inset 0 0 6px rgba(255,255,255,0.2);
   will-change: transform;
+  z-index: 2;
 }
-
 .slime-field .bubble.attracted { transform: scale(1.15); }
