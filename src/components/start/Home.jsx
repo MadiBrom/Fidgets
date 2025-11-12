@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { Link } from "react-router-dom";
 import { FIDGETS } from "./fidgets";
-import "./Home.css";
+import "./home.css";
 
 const Home = () => {
   return (

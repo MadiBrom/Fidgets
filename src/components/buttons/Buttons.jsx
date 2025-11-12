@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./Buttons.css";
+import "./buttons.css";
 
 const roundedStarPath = ({ points = 5, outer = 48, inner = 26, round = 7 }) => {
   const cx = 50, cy = 50;
