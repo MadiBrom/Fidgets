@@ -4,7 +4,7 @@ import Navbar from "./components/navbar/Navbar"
 import Home from "./components/start/Home";
 import Buttons from "./components/buttons/Buttons";
 import Confetti from "./components/confetti/Confetti";
-import Bubbles from "./components/pops/Bubbles";
+import Pops from "./components/pops/Pops";
 import Birds from "./components/Birds";
 import Lines from "./components/Lines";
 import Ocean from "./components/Ocean";
@@ -28,7 +28,7 @@ function App() {
         } />        */}
         <Route path="/buttons" element={<Buttons />} />
         <Route path="/birds" element={<Birds />} />
-        <Route path="/pops" element={<Bubbles />} />
+        <Route path="/pops" element={<Pops />} />
         <Route path="/lines" element={<Lines />} />
         <Route path="/ocean" element={<Ocean />} />
         <Route path="/rainbow" element={<Rainbow />} />

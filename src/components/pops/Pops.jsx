@@ -1,8 +1,8 @@
 import React from "react";
 import { useEffect, useRef, useState } from "react";
-import "./bubbles.css";
+import "./pops.css";
 
-const Bubbles = () => {
+const Pops = () => {
   const popfieldRef = useRef(null);
   const rafRef = useRef(0);
   const [pops, setPops] = useState([]);
@@ -307,4 +307,4 @@ const Bubbles = () => {
   );
 };
 
-export default Bubbles;
+export default Pops;
