@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/navbar/Navbar"
-import Home from "./components/home/Home";
+import Home from "./components/start/Home";
 import Buttons from "./components/buttons/Buttons";
 import Confetti from "./components/confetti/Confetti";
 import Bubbles from "./components/pops/Bubbles";
