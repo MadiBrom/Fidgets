@@ -1,5 +1,7 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 
+import "./lines.css";
+
 const Lines = () => {
   const canvasRef = useRef(null);
   const [scaleFactor, setScaleFactor] = useState(1); 
@@ -148,10 +150,9 @@ const Lines = () => {
   }, [stars, scaleFactor]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: "fixed", top: 0, left: 0, pointerEvents: "none" }}
-    />
+    <div className="lines" aria-hidden="true">
+      <canvas ref={canvasRef} className="lines-canvas" />
+    </div>
   );
 };
 

@@ -6,7 +6,7 @@ import Buttons from "./components/buttons/Buttons";
 import Confetti from "./components/confetti/Confetti";
 import Pops from "./components/pops/Pops";
 import Birds from "./components/Birds";
-import Lines from "./components/Lines";
+import Lines from "./components/lines/Lines";
 import Ocean from "./components/Ocean";
 import Rainbow from "./components/Rainbow";
 import Drips from "./components/Drips";
