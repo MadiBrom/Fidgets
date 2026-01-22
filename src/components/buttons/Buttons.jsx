@@ -53,7 +53,6 @@ const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
 const EDGE_PAD = 5;
 const clamp = (min, v, max) => Math.max(min, Math.min(v, max));
 
-// Reads the current playable area (btn-play) rect
 const readPlayRect = (el) => {
   if (!el) return { width: window.innerWidth, height: window.innerHeight, left: 0, top: 0 };
   const r = el.getBoundingClientRect();
@@ -69,8 +68,6 @@ const getRandomPositionForSize = (size, playEl) => {
   return { top, left };
 };
 
-// Derive a scale factor from the play area size.
-// Baseline is roughly 1200x700; clamp for sane bounds.
 const getScaleForRect = (rect) => {
   const w = Math.max(320, rect.width || window.innerWidth);
   const h = Math.max(360, rect.height || window.innerHeight);
@@ -120,7 +117,7 @@ const Buttons = () => {
       const rect = readPlayRect(playRef.current);
       const scale = getScaleForRect(rect);
       const generated = Array.from({ length: count }, (_, i) => {
-        const baseSize = Math.floor(Math.random() * 70) + 70; // 70-140 baseline
+        const baseSize = Math.floor(Math.random() * 70) + 70;
         const size = Math.round(baseSize * scale);
         return {
           id: `btnStar${i + 1}`,
@@ -135,11 +132,9 @@ const Buttons = () => {
       setStars(generated);
     };
 
-    // wait a frame for layout to stabilize so playRef has size
     requestAnimationFrame(init);
   }, []);
 
-  // Resize-responsive: rescale stars and clamp positions to the play area
   useEffect(() => {
     const onResize = () => {
       const rect = readPlayRect(playRef.current);
@@ -259,7 +254,6 @@ const Buttons = () => {
     const toIn = setTimeout(() => {
       setStars(prev => prev.map(s => s.id === id ? {
         ...s,
-        // Constrain respawn to the playing field bounds
         position: getRandomPositionForSize(s.size, playRef.current),
         phase: "in",
         key: s.key + 1,

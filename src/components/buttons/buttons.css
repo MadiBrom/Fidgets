@@ -13,16 +13,15 @@
   width: 100%;
   height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr; /* compact header above play */
-  row-gap: 2px; /* tracker sits 2px above play */
+  grid-template-rows: auto 1fr;
+  row-gap: 2px;
   overflow: hidden;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding: var(--fixed-top-clearance, 44px) 5px 5px; /* clear navbar */
+  padding: var(--fixed-top-clearance, 44px) 5px 5px;
   background: radial-gradient(1200px 800px at 50% 0%, #151515 0%, #0f0f0f 60%, #0a0a0a 100%);
 }
 
-/* Inner playing field similar to Confetti */
 .btn-play {
   position: relative;
   min-height: 0;
@@ -86,11 +85,9 @@
 @media (max-width: 640px){ .btn-hud { } }
 @media (min-width: 641px){ .btn-hud { } }
 
-/* Header row to hold the tracker */
 .btn-header {
   display: grid;
   place-items: center;
-  /* 2px gap above play, no extra top padding */
   margin: 0;
   margin-bottom: 2px;
 }
@@ -233,7 +230,7 @@
   display: grid;
   place-items: center;
   background: rgba(0,0,0,0.45);
-  z-index: 900; /* below navbar (1000), above app */
+  z-index: 900;
 }
 .btn-breather .btn-breather-pulse {
   position: absolute;

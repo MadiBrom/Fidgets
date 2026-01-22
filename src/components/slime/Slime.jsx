@@ -1,4 +1,3 @@
-// Slime.jsx
 import React, { useEffect, useRef, useState } from "react";
 import "./slime.css";
 
@@ -10,17 +9,14 @@ const Slime = () => {
   const rafRef = useRef(0);
   const dataRef = useRef({ bubbles: [], rect: { width: 0, height: 0, left: 0, top: 0 } });
 
-  // pointer
   const mouseRef = useRef({ x: 0, y: 0, active: false, down: false });
 
-  // pressure trail
-  const imprintsRef = useRef([]);     // {x, y, r, life}
+  const imprintsRef = useRef([]);
   const lastImprintT = useRef(0);
 
   const createAllRef = useRef(null);
   const [count, setCount] = useState(0);
 
-  // device aware config
   const makeConfig = () => {
     const isCoarse = typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches;
     const prefersReduce = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -37,7 +33,6 @@ const Slime = () => {
       MIN_GAP: 70,
       MAX_SPEED: 0.7,
 
-      // pressure
       PRESSURE_ADD_EVERY_MS: 18,
       PRESSURE_R_HOVER: 90,
       PRESSURE_R_DOWN: 140,
@@ -62,7 +57,6 @@ const Slime = () => {
 
   const cfgRef = useRef(makeConfig());
 
-  // update config if input or motion changes
   useEffect(() => {
     const m1 = matchMedia("(pointer: coarse)");
     const m2 = matchMedia("(prefers-reduced-motion: reduce)");
@@ -79,7 +73,6 @@ const Slime = () => {
     const field = fieldRef.current;
     if (!field) return;
 
-    // measure and size canvas
     const readRect = () => {
       const r = field.getBoundingClientRect();
       dataRef.current.rect = { width: r.width, height: r.height, left: r.left, top: r.top };
@@ -130,7 +123,6 @@ const Slime = () => {
       field.appendChild(frag);
       setCount(dataRef.current.bubbles.length);
 
-      // loop
       let last = performance.now();
       const tick = (t) => {
         const dtMs = t - last;
@@ -147,7 +139,6 @@ const Slime = () => {
 
         const mr = mouseRef.current;
 
-        // pressure trail
         if (mr.active && t - lastImprintT.current >= PRESSURE_ADD_EVERY_MS) {
           const r = mr.down ? PRESSURE_R_DOWN : PRESSURE_R_HOVER;
           imprintsRef.current.push({ x: mr.x, y: mr.y, r, life: 1 });
@@ -161,20 +152,16 @@ const Slime = () => {
           if (p.life < 0.05) imprintsRef.current.splice(i, 1);
         }
 
-        // bubble sim
         for (const b of dataRef.current.bubbles) {
           let fx = 0;
           let fy = 0;
 
-          // drift
           fx += (Math.random() * 2 - 1) * JITTER;
           fy += (Math.random() * 2 - 1) * JITTER;
 
-          // spring to home
           fx += (b.homeX - b.x) * HOME_K;
           fy += (b.homeY - b.y) * HOME_K;
 
-          // pointer pull with soft no touch zone
           if (mr.active) {
             const dx = mr.x - b.x;
             const dy = mr.y - b.y;
@@ -194,7 +181,6 @@ const Slime = () => {
             b.el.classList.remove("attracted");
           }
 
-          // pressure gradient
           if (imprintsRef.current.length) {
             const n = imprintsRef.current.length;
             for (let i = n - 1; i >= Math.max(0, n - 8); i--) {
@@ -212,11 +198,9 @@ const Slime = () => {
             }
           }
 
-          // integrate
           b.vx = (b.vx + fx * dt) * Math.pow(DAMPING, dt);
           b.vy = (b.vy + fy * dt) * Math.pow(DAMPING, dt);
 
-          // clamp
           const sp = Math.hypot(b.vx, b.vy);
           if (sp > MAX_SPEED) {
             const s = MAX_SPEED / sp;
@@ -227,7 +211,6 @@ const Slime = () => {
           b.x += b.vx * dt;
           b.y += b.vy * dt;
 
-          // walls
           if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx) * 0.4; }
           if (b.x > width - b.size) { b.x = width - b.size; b.vx = -Math.abs(b.vx) * 0.4; }
           if (b.y < 0) { b.y = 0; b.vy = Math.abs(b.vy) * 0.4; }
@@ -254,11 +237,9 @@ const Slime = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
-      // draw each imprint with a shadow bowl then glow
       for (const p of imprintsRef.current) {
         const r = p.r;
 
-        // shadow
         ctx.globalCompositeOperation = "multiply";
         const rShadow = r * 0.95;
         const shadow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rShadow);
@@ -269,7 +250,6 @@ const Slime = () => {
         ctx.arc(p.x, p.y, rShadow, 0, Math.PI * 2);
         ctx.fill();
 
-        // glow
         ctx.globalCompositeOperation = "screen";
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
         g.addColorStop(0.0, `rgba(180, 255, 210, ${0.25 * p.life})`);
@@ -281,7 +261,6 @@ const Slime = () => {
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // specular highlight
         ctx.globalCompositeOperation = "lighter";
         const s = r * 0.25;
         const h = ctx.createRadialGradient(p.x + s * 0.15, p.y - s * 0.15, 0, p.x + s * 0.15, p.y - s * 0.15, s);
@@ -297,7 +276,6 @@ const Slime = () => {
     createAllRef.current = createAll;
     createAll();
 
-    // pointer events on field
     const onPointerMove = (e) => {
       const r = dataRef.current.rect;
       mouseRef.current.x = e.clientX - r.left;
@@ -346,7 +324,6 @@ const Slime = () => {
         </div>
 
         <div ref={fieldRef} className="slime-field" aria-hidden="false">
-          {/* living slime backdrop */}
           <svg className="slime-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <linearGradient id="slimeGrad" x1="0" y1="0" x2="0" y2="1">
@@ -371,9 +348,7 @@ const Slime = () => {
             <rect x="0" y="0" width="100" height="100" filter="url(#slimeNoise)" opacity="0.45" />
           </svg>
 
-          {/* pressure layer */}
           <canvas ref={canvasRef} className="slime-canvas" />
-          {/* bubbles are appended here */}
         </div>
       </main>
     </div>
