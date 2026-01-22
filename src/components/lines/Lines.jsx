@@ -137,7 +137,8 @@ const Lines = () => {
       adjustStarSizes(); 
     };
 
-    setCanvasSize(); 
+    setCanvasSize();
+    draw(window.innerWidth / 2, window.innerHeight / 2);
     window.addEventListener("resize", setCanvasSize); 
 
     return () => {
